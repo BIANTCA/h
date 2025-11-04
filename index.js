@@ -50,18 +50,6 @@ fs.watchFile(saveFilePath, async () => {
  }
 })
 
-fs.watchFile(msgFilePath, async () => {
- console.log('♻️  File msg.js berubah, memuat ulang...')
- try {
-  const newMsgModule = await import(`./msg.js?update=${Date.now()}`)
-  handleMessage = newMsgModule.handleMessage
-  console.log('✅ msg.js berhasil di-reload')
- } catch (err) {
-  console.error('❌ Gagal reload msg.js:', err)
-  sock.sendMessage(ownerJid, {text: `❌ Gagal reload msg.js: ${err}`})
- }
-})
-
 // helper kirim notifikasi aman ke owner
 async function sendToSelf(sock, text) {
  try {
@@ -96,6 +84,18 @@ async function startBot() {
  })
  console.log('DEBUG: USE_PAIRING_CODE =', USE_PAIRING_CODE, 'PAIRING_PHONE =', PAIRING_PHONE)
  console.log('DEBUG: typeof sock.requestPairingCode =', typeof sock.requestPairingCode)
+ 
+fs.watchFile(msgFilePath, async () => {
+ console.log('♻️  File msg.js berubah, memuat ulang...')
+ try {
+  const newMsgModule = await import(`./msg.js?update=${Date.now()}`)
+  handleMessage = newMsgModule.handleMessage
+  console.log('✅ msg.js berhasil di-reload')
+ } catch (err) {
+  console.error('❌ Gagal reload msg.js:', err)
+  sock.sendMessage(ownerJid, {text: `❌ Gagal reload msg.js: ${err}`})
+ }
+})
 
  sock.ev.on('creds.update', saveCreds)
  sock.ev.on('group-participants.update', async (update) => {
