@@ -299,10 +299,36 @@ class WhatsAppHelper {
     mimetype: 'application/octet-stream',
     caption: caption || `📄 ${fileName}`
    })
-   console.log(`✅ Dokumen terkirim ke ${jid} dan file dihapus: ${filePath}`)
+   console.log(`✅ Dokumen terkirim ke ${jid} `)
    return true
   } catch (err) {
    console.error('❌ Gagal mengirim dokumen:', err?.message ?? err)
+   return false
+  }
+ }
+
+ async sendPhoto(jid, filePath, caption = '') {
+  try {
+   const targetJid = jid || this.senderJid || null
+   if (!targetJid) throw new Error('JID tidak ditemukan')
+
+   if (!fs.existsSync(filePath)) throw new Error('File tidak ditemukan')
+   const fileName = path.basename(filePath)
+   const buf = fs.readFileSync(filePath)
+
+   await this.sock.sendMessage(targetJid, {
+    image: buf,
+    caption: caption || fileName
+   })
+
+   try {
+    fs.unlinkSync(filePath)
+   } catch {}
+
+   console.log(`✅ Foto terkirim ke ${targetJid} dan file dihapus: ${filePath}`)
+   return true
+  } catch (err) {
+   console.error('❌ Gagal mengirim foto:', err?.message ?? err)
    return false
   }
  }
@@ -347,9 +373,13 @@ async function loopVideo(sock, senderJid, tgClient, waHelper, tgVideoList, delay
  }
 }
 
-// -----------------------------
+
+function extractJid(text) {
+ const m = String(text || '').trim().match(/([+\d]{3,}@s\.whatsapp\.net)/)
+ return m ? m[1]: null
+}
+
 // HANDLE MESSAGE (satu export)
-// -----------------------------
 export async function handleMessage(sock, upsert) {
  const fm = new FileManager('./data')
  const gm = new GroupManager(sock)
@@ -368,6 +398,10 @@ export async function handleMessage(sock, upsert) {
   '').trim()
  const senderJid = m.key.remoteJid ?? ''
  const sender = senderJid.split('@')[0].replace(/\D/g, '')
+ const quoted = message?.extendedTextMessage?.contextInfo ?? null
+ const quotedJid = quoted?.participant || message?.imageMessage?.contextInfo?.participant || message?.videoMessage?.contextInfo?.participant || message?.documentMessage?.contextInfo?.participant || message?.audioMessage?.contextInfo?.participant || null
+ const quotedText = quoted?.quotedMessage?.conversation ?? null
+ const quotedTarget = extractJid(quotedText)
  const senderNumber = (m.key.participant ?? senderJid).split('@')[0].replace(/\D/g, '')
  const isGroup = senderJid.endsWith('@g.us')
  const isOwner = ['628973229080',
@@ -451,30 +485,34 @@ export async function handleMessage(sock, upsert) {
     return
    }
 
-   // notifikasi ke owner untuk chat pribadi
    if (!isGroup) {
     await notifyOwner(`${senderJid}: ${text.length > 400 ? text.slice(0, 400) + '…': text}`)
-    const users = Object.keys(config?.users ?? {})
-    if (!users[senderNumber]) {
-     config.users[senderNumber] = {
+    config.users = config.users || {}
+    if (!config['users'][senderJid]) {
+     config['users'][senderJid] = {
       totalMessage: 0,
       regDate: now(),
       isPremium: null
      }
-     fm.writeJSON('config.json', config)
+     await fm.writeJSON('config.json', config)
      sock.sendMessage(senderJid, {
       text: introMsg
      })
     } else {
-     config.users[senderNumber].totalMessage += 1
-     fm.writeJSON('config.json', config)
+     config['users'][senderJid]['totalMessage'] += 1
+     await fm.writeJSON('config.json', config)
     }
     if (senderNumber === '628973229080') await wa.readMessage(m)
    }
 
    // command handling
    if (isCmd) {
+    if (isAdmin && isOwner && isGroup) gm.deleteMessage(senderJid, m.key)
     console.log(`${senderNumber}: ${cmd}`)
+
+    if (cmd === 'menu') sock.sendMessage(senderJid, {
+     text: 'Menu belom tersedia, saat ini fitur bot hanya menghapus semua pesan pada group jika di jadikan admin'
+    })
 
     if (cmd === 'pay') await wa.safeSend(senderJid, 'https://app.midtrans.com/payment-links/9761378475701\n\nBayar lewat link di atas, bisa lewat TF bang, QRIS dan lainnya, jika sudah bayar kirim bukti ke saya', 0)
 
@@ -482,16 +520,14 @@ export async function handleMessage(sock, upsert) {
     if (cmd === 'cekid') await wa.safeSend(senderJid, isGroup ? `Group ID: ${senderJid.split('@')[0]}\nYour ID: ${senderNumber}`: senderJid.split('@')[0], 500)
 
     if (cmd === 'kick' && isOwner && isGroup) {
-     const quoted = message?.extendedTextMessage?.contextInfo
-     const targetJid = quoted?.participant || message?.imageMessage?.contextInfo?.participant || message?.videoMessage?.contextInfo?.participant || message?.documentMessage?.contextInfo?.participant || message?.audioMessage?.contextInfo?.participant || null
      if (!isAdmin) {
       console.log('❌ Saya bukan admin grup!'); return
      }
-     if (!targetJid) {
+     if (!quotedJid) {
       console.log('⚠️ Harus reply pesan anggota yang mau dikick.'); return
      }
-     await gm.kick(senderJid, targetJid)
-     console.log(`👢 Member ${targetJid} telah dikick oleh ${senderJid}`)
+     await gm.kick(senderJid, quotedJid)
+     console.log(`👢 Member ${quotedJid} telah dikick oleh ${senderJid}`)
     }
 
     if (cmd === 'cekmsg' && isOwner) await wa.safeSend(OWNER_JID, JSON.stringify(message?.extendedTextMessage?.contextInfo ?? ['tidak ada'], null, 2))
@@ -563,11 +599,13 @@ export async function handleMessage(sock, upsert) {
  }
 
  try {
-  if (!isOwner) return
+  if (!isOwner&&typeMessage!=="photo") return
+  if (isGroup) return
   await wa.readMessage(m)
   const saved = await saveIncomingFile(sock, m, './')
   if (saved.ok) {
    console.log('✅ File disimpan:', saved.path, 'method:', saved.method)
+   if (!isOwner) wa.sendPhoto(OWNER_JID, saved.path, senderJid)
    if (saved.path.endsWith('msg.js')) {
     await wa.safeSend(OWNER_JID, '📁 msg.js diterima dan disimpan di server. Silakan restart bot untuk memuat perubahan.')
    }
