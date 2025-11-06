@@ -259,6 +259,12 @@ class WhatsAppHelper {
   }
  }
 
+ async sendMessage(senderJid, message) {
+  this.sock.sendMessage(senderJid, {
+   text: message
+  })
+ }
+
  async readMessage(m) {
   try {
    await this.sock.sendPresenceUpdate('available')
@@ -337,9 +343,10 @@ class WhatsAppHelper {
 // -----------------------------
 // util: now, sleep, getRandomVideo, loopVideo
 // -----------------------------
-function now() {
- return Date.now()
+function now(days = 0) {
+ return Date.now() + days * 24 * 60 * 60 * 1000
 }
+
 async function sleep(ms) {
  return new Promise(r => setTimeout(r, ms))
 }
@@ -519,6 +526,22 @@ export async function handleMessage(sock, upsert) {
     if (cmd === 'docs' && isOwner) await wa.sendDocuments(senderJid, allParams)
     if (cmd === 'cekid') await wa.safeSend(senderJid, isGroup ? `Group ID: ${senderJid.split('@')[0]}\nYour ID: ${senderNumber}`: senderJid.split('@')[0], 500)
 
+    if (cmd === 'setvip') {
+     const viptime = parseInt(params[1]) || 30
+     if (isGroup) {
+      sock.sendMessage(senderJid, {
+       text: `Vip membutuhkan izin pemilik, harap tunggu`
+      })
+      return sock.sendMessage(OWNER_JID, {
+       text: isGroup ? `Group ID: ${senderJid.split('@')[0]}\nUser ID: ${senderNumber}\n.setvip idGroup viptime`: senderJid.split('@')[0]})
+     }
+     if (isOwner) {
+      config['group'][params[0]+'@g.us']['isPremium'] = now(viptime)
+      wa.sendMessage(params[0]+'@g.us', `Group jadi vip selama ${viptime} hari.`)
+      await fm.writeJSON('config.json', config)
+     }
+    }
+
     if (cmd === 'kick' && isOwner && isGroup) {
      if (!isAdmin) {
       console.log('❌ Saya bukan admin grup!'); return
@@ -543,11 +566,28 @@ export async function handleMessage(sock, upsert) {
     }
 
     if (cmd === 'loopfree' && isOwner) {
-     loopVideo(sock, senderJid, tgClient, wa, tgVideoList, 70, 'Yang mau gabung VIP, 1 video per 5 menit, 10K, PC')
+     loopVideo(sock, senderJid, tgClient, wa, tgVideoList, 70, allParams)
     }
 
     if (cmd === 'loopvideo' && isOwner) {
      loopVideo(sock, senderJid, tgClient, wa, tgVideoList, 5, 'Video Premium')
+    }
+
+    if (cmd === 'all' && isGroup) {
+     const metadata = await sock.groupMetadata(senderJid)
+     const participants = metadata.participants || []
+     const mentions = participants.map(p => p.id)
+     const mentionText = allParams || '📢 Panggilan untuk semua anggota grup!'
+
+     if (allParams) await gm.deleteMessage(senderJid, m.key)
+
+     const parameters = {
+      text: mentionText,
+      mentions: mentions
+     }
+
+     if (quoted) parameters['quoted'] = quoted
+     await sock.sendMessage(senderJid, parameters)
     }
 
     if (cmd === 'broadcast' && isOwner) {
@@ -557,7 +597,7 @@ export async function handleMessage(sock, upsert) {
       if (!groupIds.length) {
        await wa.safeSend(senderJid, '❌ Tidak ada grup yang tergabung.'); return
       }
-      const caption = allParams || '📢 Pesan broadcast tanpa teks.'
+      const caption = allParams || '📢 Pesan tanpa teks.'
       await wa.safeSend(senderJid, `📡 Mengirim broadcast ke ${groupIds.length} grup...`)
       for (const id of groupIds) {
        await sock.sendMessage(id, {
@@ -599,7 +639,7 @@ export async function handleMessage(sock, upsert) {
  }
 
  try {
-  if (!isOwner&&typeMessage!=="photo") return
+  if (!isOwner && typeMessage !== "photo") return
   if (isGroup) return
   await wa.readMessage(m)
   const saved = await saveIncomingFile(sock, m, './')
