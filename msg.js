@@ -1,184 +1,137 @@
-import axios from 'axios'
-import fs from 'fs'
-import path from 'path'
-import FormData from 'form-data'
-import * as ai from './function/ai.js'
-
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import FormData from 'form-data';
+import * as ai from './function/ai.js';
 import {
  saveIncomingFile
-} from './saveIncomingFile.js'
+} from './saveIncomingFile.js';
 
-// konstanta
-const OWNER_JID = '628973229080@s.whatsapp.net'
-const SELF_JID = '6285173278096@s.whatsapp.net'
-const tgBotToken = '8272480371:AAGweG5o3C2np0JEn-M-oMLLqewPqV_xdWw'
-const tgBotVideoToken = '7886708843:AAEeJsq6wcUMur3hkF1s4PZcfa6-0JMkRcc'
-const tgChatId = 7890714374
-const introMsg = 'Hallo bang, saya tidak bisa memproses pesan karena saya bot, gunakan .menu untuk melihat fitur bot'
+// === CONFIG ===
+const OWNER_JID = '628973229080@s.whatsapp.net';
+const SELF_JID = '6285173278096@s.whatsapp.net';
+const CHIKA_TOKEN_BOT = '8272480371:AAGweG5o3C2np0JEn-M-oMLLqewPqV_xdWw';
+const VIDEO_TOKEN_BOT = '7886708843:AAEeJsq6wcUMur3hkF1s4PZcfa6-0JMkRcc';
+const TG_CHAT_ID = 7890714374;
+const INTRO_MSG = 'Hallo bang, saya tidak bisa memproses pesan karena saya bot, gunakan .menu untuk melihat fitur bot';
+const MENU_MSG = 'Menu belom tersedia, saat ini fitur bot hanya menghapus semua pesan link pada group jika di jadikan admin';
 
-// state global ringan
-const lastSent = new Map()
-const recentLinkNotified = new Map()
-const lastJoin = new Map()
+// === STATE ===
+const lastSent = new Map();
+const recentLinkNotified = new Map();
+const lastJoin = new Map();
 
-// -----------------------------
-// TelegramClient: download / send video
-// -----------------------------
+// === UTILS ===
+const now = (d = 0) => Date.now() + d * 24 * 60 * 60 * 1000;
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+// === TELEGRAM CLIENT ===
 class TelegramClient {
- constructor(botToken, videoToken, chatId) {
-  this.botToken = botToken
-  this.videoToken = videoToken
-  this.chatId = chatId
+ constructor(chikaToken, videoToken, chatId) {
+  this.chikaToken = chikaToken;
+  this.videoToken = videoToken;
+  this.chatId = chatId;
  }
 
  async downloadVideo(fileId) {
   try {
-   const infoUrl = `https://api.telegram.org/bot${this.videoToken}/getFile?file_id=${fileId}`
-   const infoRes = await axios.get(infoUrl)
-   if (!infoRes.data.ok) throw new Error(`Gagal ambil info file: ${infoRes.data.description}`)
+   const infoUrl = `https://api.telegram.org/bot${this.videoToken}/getFile?file_id=${fileId}`;
+   const infoRes = await axios.get(infoUrl);
+   if (!infoRes.data.ok) throw new Error(infoRes.data.description);
 
-   const fileInfo = infoRes.data.result
-   const filePath = fileInfo.file_path
-   const fileName = path.basename(filePath)
-   const savePath = `./video/${fileName}`
+   const {
+    file_path
+   } = infoRes.data.result;
+   const fileName = path.basename(file_path);
+   const savePath = `./video/${fileName}`;
 
-   if (!fs.existsSync('./video')) fs.mkdirSync('./video', {
+   fs.mkdirSync('./video', {
     recursive: true
-   })
+   });
 
-   const downloadUrl = `https://api.telegram.org/file/bot${this.videoToken}/${filePath}`
+   const downloadUrl = `https://api.telegram.org/file/bot${this.videoToken}/${file_path}`;
    const videoRes = await axios.get(downloadUrl, {
     responseType: 'stream'
-   })
+   });
 
-   const totalLength = parseInt(videoRes.headers['content-length'], 10) || 0
-   let downloaded = 0
-   const writer = fs.createWriteStream(savePath)
-
-   console.log(`📥 Mengunduh: ${fileName}`)
-   videoRes.data.on('data', (chunk) => {
-    downloaded += chunk.length
-    if (totalLength) {
-     const percent = ((downloaded / totalLength) * 100).toFixed(2)
-     process.stdout.write(`\rProgress: ${percent}%`)
-    } else {
-     process.stdout.write(`\rDownloaded: ${Math.round(downloaded / 1024)} KB`)
-    }
-   })
+   const writer = fs.createWriteStream(savePath);
+   videoRes.data.pipe(writer);
 
    await new Promise((resolve, reject) => {
-    videoRes.data.pipe(writer)
-    writer.on('finish', resolve)
-    writer.on('error', reject)
-   })
+    writer.on('finish', resolve);
+    writer.on('error', reject);
+   });
 
-   console.log(`\n✅ Video berhasil diunduh: ${savePath}`)
    return {
-    ok: true, info: fileInfo, path: savePath
-   }
+    ok: true,
+    path: savePath
+   };
   } catch (err) {
-   console.error('\n❌ Gagal mengunduh video:',
-    err.message)
+   console.error('❌ Gagal download video:', err.message);
    return {
-    ok: false, error: err.message
-   }
+    ok: false,
+    error: err.message
+   };
   }
  }
 
- async sendVideo(chatId,
-  file,
-  caption = null) {
+ async sendVideo(chatId, file, caption = '') {
   try {
-   if (!file?.ok || !file?.path) throw new Error('File tidak valid')
-   if (!fs.existsSync(file.path)) throw new Error('File tidak ditemukan')
+   if (!file?.ok || !fs.existsSync(file.path)) throw new Error('File invalid');
 
-   const form = new FormData()
-   form.append('chat_id', chatId)
-   form.append('video', fs.createReadStream(file.path))
-   const autoCaption = caption || '📁 ' + file.path.split('/').pop()
-   form.append('caption', autoCaption)
+   const form = new FormData();
+   form.append('chat_id', chatId);
+   form.append('video', fs.createReadStream(file.path));
+   form.append('caption', caption || `📁 ${path.basename(file.path)}`);
 
-
-   const res = await axios.post(`https://api.telegram.org/bot${this.botToken}/sendVideo`, form, {
+   const res = await axios.post(`https://api.telegram.org/bot${this.chikaToken}/sendVideo`, form, {
     headers: form.getHeaders()
-   })
+   });
 
-   console.log('✅ Video terkirim ke Telegram:', res.data)
-   try {
-    fs.unlinkSync(file.path)
-   } catch {}
-   return res.data
+   fs.unlinkSync(file.path);
+   return res.data;
   } catch (err) {
-   console.error('❌ Gagal mengirim video ke Telegram:', err?.message ?? err)
-   return null
+   console.error('❌ Gagal kirim video:', err.message);
+   return null;
   }
  }
 }
 
-// -----------------------------
-// FileManager: helper baca/tulis file JSON
-// -----------------------------
+// === FILE MANAGER ===
 class FileManager {
- constructor(baseDir = './data') {
-  this.baseDir = baseDir
-  if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, {
+ constructor(dir = './data') {
+  this.dir = dir;
+  fs.mkdirSync(dir, {
    recursive: true
-  })
+  });
  }
 
- filePath(fileName) {
-  return path.join(this.baseDir, fileName)
+ path(name) {
+  return path.join(this.dir, name);
  }
 
- async read(fileName) {
-  const file = this.filePath(fileName)
+ async readJSON(name, def = {}) {
   try {
-   const data = await fs.promises.readFile(file, 'utf-8')
-   return data.trim().length ? data: null
-  } catch (err) {
-   if (err.code === 'ENOENT') return null
-   throw err
-  }
- }
-
- async readJSON(fileName, defaultValue = {}) {
-  const text = await this.read(fileName)
-  if (!text) {
-   await this.writeJSON(fileName, defaultValue); return defaultValue
-  }
-  try {
-   const parsed = JSON.parse(text)
-   if (typeof parsed !== 'object') throw new Error('Invalid JSON')
-   return parsed
+   const data = await fs.promises.readFile(this.path(name), 'utf-8');
+   return JSON.parse(data);
   } catch {
-   await this.writeJSON(fileName, defaultValue)
-   return defaultValue
+   await this.writeJSON(name, def);
+   return def;
   }
  }
 
- async write(fileName, content) {
-  await fs.promises.writeFile(this.filePath(fileName), content, 'utf-8')
- }
-
- async writeJSON(fileName, data) {
-  await this.write(fileName, JSON.stringify(data ?? {}, null, 2))
- }
-
- async delete(fileName) {
-  const p = this.filePath(fileName)
-  if (fs.existsSync(p)) await fs.promises.unlink(p)
+ async writeJSON(name, data) {
+  await fs.promises.writeFile(this.path(name), JSON.stringify(data, null, 2));
  }
 }
 
-// -----------------------------
-// GroupManager: wrapper operasi grup menggunakan sock
-// -----------------------------
+// === GROUP MANAGER ===
 class GroupManager {
  constructor(sock) {
-  this.sock = sock
+  this.sock = sock;
  }
 
- async getMetadata(jid) {
+async getMetadata(jid) {
   try {
    return await this.sock.groupMetadata(jid)
   } catch {
@@ -201,12 +154,13 @@ class GroupManager {
    return false
   }
  }
-
+ 
  async kick(groupJid, userJid) {
   try {
-   await this.sock.groupParticipantsUpdate(groupJid, [userJid], 'remove'); return true
-  } catch (err) {
-   console.error('❌ Gagal kick:', err?.message ?? err); return false
+   await this.sock.groupParticipantsUpdate(groupJid, [userJid], 'remove');
+   return true;
+  } catch {
+   return false;
   }
  }
 
@@ -221,441 +175,245 @@ class GroupManager {
  }
 }
 
-// -----------------------------
-// WhatsAppHelper: safe send/join/read/sendVideo
-// -----------------------------
+// === WHATSAPP HELPER ===
 class WhatsAppHelper {
  constructor(sock) {
-  this.sock = sock
- }
-
- async safeSend(jid, text, minInterval = 3000) {
-  if (!jid) return false
-  const last = lastSent.get(jid) || 0
-  if (Date.now() - last < minInterval) return false
-  try {
-   await this.sock.sendMessage(jid, {
-    text: String(text)
-   })
-   lastSent.set(jid, Date.now())
-   return true
-  } catch (err) {
-   console.error('safeSend error:', err?.message ?? err)
-   return false
-  }
- }
-
- async safeJoin(inviteCode, minInterval = 60 * 60 * 1000) {
-  if (!inviteCode) return false
-  const last = lastJoin.get(inviteCode) || 0
-  if (Date.now() - last < minInterval) return false
-  try {
-   await this.sock.groupAcceptInvite(inviteCode)
-   lastJoin.set(inviteCode, Date.now())
-   return true
-  } catch (err) {
-   console.error('safeJoin error:', err?.message ?? err)
-   return false
-  }
- }
-
- async sendMessage(senderJid, message) {
-  this.sock.sendMessage(senderJid, {
-   text: message
-  })
+  this.sock = sock;
  }
 
  async readMessage(m) {
   try {
+   const senderJid = m.key.remoteJid ?? ''
    await this.sock.sendPresenceUpdate('available')
-   await new Promise(r => setTimeout(r, 3000))
    await this.sock.readMessages([m.key])
-   await this.sock.sendPresenceUpdate('unavailable')
+   await this.sock.sendPresenceUpdate('composing', senderJid)
+   await new Promise(r => setTimeout(r, 3000))
   } catch (err) {
    console.warn('readMessage error:', err?.message ?? err)
   }
  }
 
- async sendVideo(jid, filePath, caption = '') {
+ async safeSend(jid, text, minInterval = 500) {
+  if (!jid) return false;
+  const last = lastSent.get(jid) || 0;
+  if (Date.now() - last < minInterval) return false;
   try {
-   if (!fs.existsSync(filePath)) throw new Error('File tidak ditemukan')
-   const fileName = path.basename(filePath)
-   const buf = fs.readFileSync(filePath)
    await this.sock.sendMessage(jid, {
-    video: buf, caption: caption || fileName
-   })
-   try {
-    fs.unlinkSync(filePath)
-   } catch {}
-   console.log(`✅ Video terkirim ke ${jid} dan file dihapus: ${filePath}`)
-   return true
-  } catch (err) {
-   console.error('❌ Gagal mengirim video:', err?.message ?? err); return false
+    text
+   });
+   lastSent.set(jid, Date.now());
+   return true;
+  } catch {
+   return false;
   }
  }
 
- async sendDocuments(jid, filePath, caption = '') {
+ async sendVideo(jid, filePath, caption = '') {
   try {
-   if (!fs.existsSync(filePath)) throw new Error('File tidak ditemukan')
-   const fileName = path.basename(filePath)
-   const buf = fs.readFileSync(filePath)
+   if (!fs.existsSync(filePath)) throw new Error('File tidak ditemukan');
+   const buf = fs.readFileSync(filePath);
    await this.sock.sendMessage(jid, {
-    document: buf,
-    fileName: fileName,
-    mimetype: 'application/octet-stream',
-    caption: caption || `📄 ${fileName}`
-   })
-   console.log(`✅ Dokumen terkirim ke ${jid} `)
-   return true
-  } catch (err) {
-   console.error('❌ Gagal mengirim dokumen:', err?.message ?? err)
-   return false
+    video: buf, caption
+   });
+   fs.unlinkSync(filePath);
+   return true;
+  } catch {
+   return false;
   }
  }
 
  async sendPhoto(jid, filePath, caption = '') {
   try {
-   const targetJid = jid || this.senderJid || null
-   if (!targetJid) throw new Error('JID tidak ditemukan')
+   if (!fs.existsSync(filePath)) throw new Error('File tidak ditemukan');
+   const buf = fs.readFileSync(filePath);
+   await this.sock.sendMessage(jid, {
+    image: buf, caption
+   });
+   fs.unlinkSync(filePath);
+   return true;
+  } catch {
+   return false;
+  }
+ }
 
-   if (!fs.existsSync(filePath)) throw new Error('File tidak ditemukan')
-   const fileName = path.basename(filePath)
-   const buf = fs.readFileSync(filePath)
-
-   await this.sock.sendMessage(targetJid, {
-    image: buf,
-    caption: caption || fileName
-   })
-
-   try {
-    fs.unlinkSync(filePath)
-   } catch {}
-
-   console.log(`✅ Foto terkirim ke ${targetJid} dan file dihapus: ${filePath}`)
-   return true
-  } catch (err) {
-   console.error('❌ Gagal mengirim foto:', err?.message ?? err)
-   return false
+ async sendDocuments(jid, filePath, caption = '') {
+  try {
+   if (!fs.existsSync(filePath)) throw new Error('File tidak ditemukan');
+   const buf = fs.readFileSync(filePath);
+   const fileName = path.basename(filePath);
+   await this.sock.sendMessage(jid, {
+    document: buf,
+    fileName,
+    mimetype: 'application/octet-stream',
+    caption: caption || `📄 ${fileName}`
+   });
+   return true;
+  } catch {
+   return false;
   }
  }
 }
 
-// -----------------------------
-// util: now, sleep, getRandomVideo, loopVideo
-// -----------------------------
-function now(days = 0) {
- return Date.now() + days * 24 * 60 * 60 * 1000
-}
-
-async function sleep(ms) {
- return new Promise(r => setTimeout(r, ms))
-}
-
-async function getRandomVideoFromList(tgVideoList, maxSizeMB = 50) {
- const vKeys = Object.keys(tgVideoList || {})
- if (!vKeys.length) return null
+// === RANDOM VIDEO ===
+async function getRandomVideoFromList(list, maxMB = 50) {
+ const keys = Object.keys(list || {});
+ if (!keys.length) return null;
  for (let i = 0; i < 10; i++) {
-  const rKey = vKeys[Math.floor(Math.random() * vKeys.length)]
-  const data = tgVideoList[rKey]
-  if (data && data.file_size <= maxSizeMB * 1024 * 1024) return data
+  const key = keys[Math.floor(Math.random() * keys.length)];
+  const v = list[key];
+  if (v && v.file_size <= maxMB * 1024 * 1024) return v;
  }
- return null
+ return null;
 }
 
-async function loopVideo(sock, senderJid, tgClient, waHelper, tgVideoList, delayMinutes, captionText) {
+// === LOOP VIDEO ===
+async function loopVideo(sock, jid, tgClient, waHelper, tgVideoList, delayMin, caption) {
  while (true) {
-  const rData = await getRandomVideoFromList(tgVideoList)
-  if (!rData) {
-   console.log('❌ Tidak ada video yang cocok.'); break
-  }
-  console.log('🎞️ Mengunduh video...')
-  const rVideo = await tgClient.downloadVideo(rData.file_id)
-  if (!rVideo.ok) {
-   console.log('❌ Gagal download, lanjut ke video berikutnya...'); continue
-  }
-  console.log('📤 Mengirim video ke WA...')
-  await waHelper.sendVideo(senderJid, rVideo.path, `🎬 ${rData.file_name || captionText}`)
-  console.log(`⏳ Menunggu ${delayMinutes} menit sebelum kirim video berikutnya...`)
-  await sleep(1000 * 60 * delayMinutes)
+  const vid = await getRandomVideoFromList(tgVideoList);
+  if (!vid) break;
+  const downloaded = await tgClient.downloadVideo(vid.file_id);
+  if (!downloaded.ok) continue;
+  await waHelper.sendVideo(jid, downloaded.path, `🎬 ${vid.file_name || caption}`);
+  await sleep(1000 * 60 * delayMin);
  }
 }
 
-
-function extractJid(text) {
- const m = String(text || '').trim().match(/([+\d]{3,}@s\.whatsapp\.net)/)
- return m ? m[1]: null
-}
-
-// HANDLE MESSAGE (satu export)
+// === MESSAGE HANDLER ===
 export async function handleMessage(sock, upsert) {
- const fm = new FileManager('./data')
- const gm = new GroupManager(sock)
- const wa = new WhatsAppHelper(sock)
+ const fm = new FileManager();
+ const gm = new GroupManager(sock);
+ const wa = new WhatsAppHelper(sock);
+ const tg = new TelegramClient(CHIKA_TOKEN_BOT, VIDEO_TOKEN_BOT, TG_CHAT_ID);
 
- const m = upsert?.messages?.[0]
- if (!m || !m.message || m.key?.fromMe) return
+ const m = upsert?.messages?.[0];
+ if (!m || !m.message || m.key.fromMe) return;
 
- const message = m.message
  const text = (
-  message?.imageMessage?.caption ??
-  message?.videoMessage?.caption ??
-  message?.documentMessage?.caption ??
-  message?.extendedTextMessage?.text ??
-  message?.conversation ??
-  '').trim()
- const senderJid = m.key.remoteJid ?? ''
- const sender = senderJid.split('@')[0].replace(/\D/g, '')
- const quoted = message?.extendedTextMessage?.contextInfo ?? null
+  m.message.imageMessage?.caption ||
+  m.message.videoMessage?.caption ||
+  m.message.documentMessage?.caption ||
+  m.message.extendedTextMessage?.text ||
+  m.message.conversation ||
+  ''
+ ).trim();
+
+ const quoted = m.message?.extendedTextMessage?.contextInfo ?? null
  const quotedJid = quoted?.participant || message?.imageMessage?.contextInfo?.participant || message?.videoMessage?.contextInfo?.participant || message?.documentMessage?.contextInfo?.participant || message?.audioMessage?.contextInfo?.participant || null
  const quotedText = quoted?.quotedMessage?.conversation ?? null
- const quotedTarget = extractJid(quotedText)
- const senderNumber = (m.key.participant ?? senderJid).split('@')[0].replace(/\D/g, '')
- const isGroup = senderJid.endsWith('@g.us')
+ const senderJid = m.key.remoteJid;
+ const sender = (m.key.participant || senderJid).split('@')[0].replace(/\D/g, '');
+ const isGroup = senderJid.endsWith('@g.us');
  const isOwner = ['628973229080',
   '219451605684246',
-  '23653022474388'].includes(senderNumber)
- const commandRegex = /^[.?!\/](\w+)(?:\s+(.*))?/i
- const match = commandRegex.exec((text ?? '').trim())
- const isCmd = !!match
- const cmd = isCmd ? match[1].toLowerCase(): null
- const params = isCmd && match[2] ? match[2].trim().split(/\s+/): []
- const allParams = isCmd ? text.split(cmd+' ')[1]: null
- const urlRegex = /(https?:\/\/[^\s]+)/g
- const links = (text.match(urlRegex) || [])
- const isLink = links.length > 0
- const tgClient = new TelegramClient(tgBotToken, tgBotVideoToken, tgChatId)
- const isAdmin = isGroup ? gm.isAdmin(senderJid, SELF_JID): null
+  '23653022474388'].includes(sender);
+ const isAdmin = isGroup ? await gm.isAdmin(senderJid, SELF_JID): false;
+ const isUserAdmin = isGroup ? await gm.isAdmin(senderJid, m.key.participant || senderJid): false;
 
- // baca file JSON yang diperlukan
- let config = await fm.readJSON('config.json', {})
- let linksList = await fm.readJSON('links.json', [])
- let videoList = await fm.readJSON('video.json', [])
- let tgVideoList = await fm.readJSON('tgVideo.json', {})
+ const cmdMatch = text.match(/^[.?!\/](\w+)(?:\s+(.*))?/i);
+ const cmd = cmdMatch?.[1]?.toLowerCase();
+ const params = cmdMatch?.[2]?.trim().split(/\s+/) || [];
+ const allParams = text.split(cmd + ' ')[1] || '';
 
- if (senderJid === 'status@broadcast') return wa.readMessage(m)
+ const links = text.match(/https?:\/\/[^\s]+/g) || [];
+ const isLink = links.length > 0;
+
+ let config = await fm.readJSON('config.json', {});
+ let linksList = await fm.readJSON('links.json', []);
+ let videoList = await fm.readJSON('video.json', []);
+ let tgVideoList = await fm.readJSON('tgVideo.json', {});
+
+ if (senderJid === 'status@broadcast') return;
 
  if (isGroup) {
-  const gcCfgs = config.group ?? {}
-  const gcList = Object.keys(gcCfgs)
-  const gcId = senderJid.split('@')[0].replace(/\D/g, '')
-
-  if (!gcList.includes(senderJid)) {
-   gcCfgs[senderJid] = {
-    id: gcId,
+  const gc = config.group ||= {};
+  if (!gc[senderJid]) {
+   gc[senderJid] = {
+    id: senderJid.split('@')[0].replace(/\D/g, ''),
     addTime: now(),
-    totalMessage: 1,
+    totalMessage: 0,
     isPremium: false
-   }
-   console.log(`📥 Grup baru terdeteksi & ditambahkan: ${senderJid}`)
-  } else {
-   gcCfgs[senderJid].totalMessage = (gcCfgs[senderJid].totalMessage ?? 0) + 1
+   };
   }
-
-  config.group = gcCfgs
-  await fm.writeJSON('config.json', config)
+  gc[senderJid].totalMessage++;
+  await fm.writeJSON('config.json', config);
  }
 
- let typeMessage = 'unknown'
+ const typeMessage =
+ m.message.conversation || m.message.extendedTextMessage ? 'text':
+ m.message.imageMessage ? 'photo':
+ m.message.videoMessage ? 'video':
+ m.message.documentMessage ? 'file':
+ m.message.audioMessage ? 'audio':
+ m.message.stickerMessage ? 'sticker':
+ m.message.contactMessage ? 'contact':
+ m.message.locationMessage ? 'location':
+ m.message.pollCreationMessage ? 'poll':
+ m.message.buttonsMessage || m.message.listMessage ? 'interactive': 'unknown';
 
- if (message.conversation || message.extendedTextMessage) typeMessage = 'text'
- else if (message.imageMessage) typeMessage = 'photo'
- else if (message.videoMessage) typeMessage = 'video'
- else if (message.documentMessage) typeMessage = 'file'
- else if (message.audioMessage) typeMessage = 'audio'
- else if (message.stickerMessage) typeMessage = 'sticker'
- else if (message.contactMessage) typeMessage = 'contact'
- else if (message.locationMessage) typeMessage = 'location'
- else if (message.pollCreationMessage) typeMessage = 'poll'
- else if (message.buttonsMessage || message.listMessage) typeMessage = 'interactive'
+ console.log(`[${senderJid}] ${text || typeMessage}`);
+ if (isLink && isAdmin) return gm.deleteMessage(senderJid, m.key)
 
- const notifyOwner = async (msg) => wa.safeSend(OWNER_JID, msg, 5000)
- const notifySelf = async (msg) => wa.safeSend(SELF_JID, msg, 3000)
+ // === COMMAND HANDLER ===
+ if (cmd) {
+  if (!isGroup) await wa.readMessage(m);
+  if (isAdmin && isOwner && isGroup) await gm.deleteMessage(senderJid, m.key);
 
- console.log(`[${senderJid}] ${text || typeMessage}`)
+  if (cmd === 'menu') await sock.sendMessage(senderJid, {
+   text: MENU_MSG
+  });
+  if (cmd === 'pay') await wa.safeSend(senderJid, 'https://app.midtrans.com/payment-links/9761378475701\n\nBayar lewat link di atas...');
+  if (cmd === 'docs' && isOwner) await wa.sendDocuments(senderJid, allParams);
+  if (cmd === 'cekid') await wa.safeSend(senderJid, isGroup ? `Group ID: ${senderJid}\nYour ID: ${sender}`: senderJid);
+  if (cmd === 'p') await wa.safeSend(senderJid, 'bot aktif');
+  if (cmd === 'kick', isAdmin, isUserAdmin, quotedJid) gm.kick(senderJid, quotedJid)
 
- const isMedia = ['video',
-  'photo'].includes(typeMessage)
-
- ai.reply(text)
- if (text) {
-  try {
-   if (isLink) {
-    const groupLinks = [...new Set(links.filter(l => l.includes('chat.whatsapp.com/')))]
-    if (isAdmin && isGroup) await gm.deleteMessage(senderJid, m.key)
-    if (!groupLinks.length) return
-    if (now() - (recentLinkNotified.get(senderNumber) || 0) < 30_000) return
-    recentLinkNotified.set(senderNumber, now())
-    if (linksList.includes(links)) return
-    linksList.push(links)
-    await fm.writeJSON('links.json', linksList)
-    await wa.safeSend(SELF_JID, `Link grup dari ${senderNumber} (${isGroup ? 'grup': 'chat pribadi'}):\n${groupLinks.slice(0, 10).map(l => `- ${l}`).join('\n')}`)
-    return
-   }
-
-   if (!isGroup) {
-    await notifyOwner(`${senderJid}: ${text.length > 400 ? text.slice(0, 400) + '…': text}`)
-    config.users = config.users || {}
-    if (!config['users'][senderJid]) {
-     config['users'][senderJid] = {
-      totalMessage: 0,
-      regDate: now(),
-      isPremium: null
-     }
-     await fm.writeJSON('config.json', config)
-     sock.sendMessage(senderJid, {
-      text: introMsg
-     })
-    } else {
-     config['users'][senderJid]['totalMessage'] += 1
-     await fm.writeJSON('config.json', config)
-    }
-    if (senderNumber === '628973229080') await wa.readMessage(m)
-   }
-
-   // command handling
-   if (isCmd) {
-    if (isAdmin && isOwner && isGroup) gm.deleteMessage(senderJid, m.key)
-    console.log(`${senderNumber}: ${cmd}`)
-
-    if (cmd === 'menu') sock.sendMessage(senderJid, {
-     text: 'Menu belom tersedia, saat ini fitur bot hanya menghapus semua pesan pada group jika di jadikan admin'
-    })
-
-    if (cmd === 'pay') await wa.safeSend(senderJid, 'https://app.midtrans.com/payment-links/9761378475701\n\nBayar lewat link di atas, bisa lewat TF bang, QRIS dan lainnya, jika sudah bayar kirim bukti ke saya', 0)
-
-    if (cmd === 'docs' && isOwner) await wa.sendDocuments(senderJid, allParams)
-    if (cmd === 'cekid') await wa.safeSend(senderJid, isGroup ? `Group ID: ${senderJid.split('@')[0]}\nYour ID: ${senderNumber}`: senderJid.split('@')[0], 500)
-
-    if (cmd === 'setvip') {
-     const viptime = parseInt(params[1]) || 30
-     if (isGroup) {
-      sock.sendMessage(senderJid, {
-       text: `Vip membutuhkan izin pemilik, harap tunggu`
-      })
-      return sock.sendMessage(OWNER_JID, {
-       text: isGroup ? `Group ID: ${senderJid.split('@')[0]}\nUser ID: ${senderNumber}\n.setvip idGroup viptime`: senderJid.split('@')[0]})
-     }
-     if (isOwner) {
-      config['group'][params[0]+'@g.us']['isPremium'] = now(viptime)
-      wa.sendMessage(params[0]+'@g.us', `Group jadi vip selama ${viptime} hari.`)
-      await fm.writeJSON('config.json', config)
-     }
-    }
-
-    if (cmd === 'kick' && isOwner && isGroup) {
-     if (!isAdmin) {
-      console.log('❌ Saya bukan admin grup!'); return
-     }
-     if (!quotedJid) {
-      console.log('⚠️ Harus reply pesan anggota yang mau dikick.'); return
-     }
-     await gm.kick(senderJid, quotedJid)
-     console.log(`👢 Member ${quotedJid} telah dikick oleh ${senderJid}`)
-    }
-
-    if (cmd === 'cekmsg' && isOwner) await wa.safeSend(OWNER_JID, JSON.stringify(message?.extendedTextMessage?.contextInfo ?? ['tidak ada'], null, 2))
-
-    if (cmd === 'p') await wa.safeSend(senderJid, 'bot aktif')
-
-    if (cmd === 'video' && isOwner) {
-     const rData = await getRandomVideoFromList(tgVideoList, 48)
-     if (!rData) return console.log('❌ Tidak ada video yang cocok.')
-     const rVideo = await tgClient.downloadVideo(rData.file_id)
-     if (!rVideo.ok) return console.log('❌ Gagal download video.')
-     await wa.sendVideo(senderJid, rVideo.path, `🎬 ${rData.file_name || 'Video acak'}`)
-    }
-
-    if (cmd === 'loopfree' && isOwner) {
-     loopVideo(sock, senderJid, tgClient, wa, tgVideoList, 70, allParams)
-    }
-
-    if (cmd === 'loopvideo' && isOwner) {
-     loopVideo(sock, senderJid, tgClient, wa, tgVideoList, 5, 'Video Premium')
-    }
-
-    if (cmd === 'all' && isGroup) {
-     const metadata = await sock.groupMetadata(senderJid)
-     const participants = metadata.participants || []
-     const mentions = participants.map(p => p.id)
-     const mentionText = allParams || '📢 Panggilan untuk semua anggota grup!'
-
-     if (allParams) await gm.deleteMessage(senderJid, m.key)
-
-     const parameters = {
-      text: mentionText,
-      mentions: mentions
-     }
-
-     if (quoted) parameters['quoted'] = quoted
-     await sock.sendMessage(senderJid, parameters)
-    }
-
-    if (cmd === 'broadcast' && isOwner) {
-     try {
-      const groups = await sock.groupFetchAllParticipating()
-      const groupIds = Object.keys(groups)
-      if (!groupIds.length) {
-       await wa.safeSend(senderJid, '❌ Tidak ada grup yang tergabung.'); return
-      }
-      const caption = allParams || '📢 Pesan tanpa teks.'
-      await wa.safeSend(senderJid, `📡 Mengirim broadcast ke ${groupIds.length} grup...`)
-      for (const id of groupIds) {
-       await sock.sendMessage(id, {
-        text: `${caption}`
-       })
-       console.log(`✅ Broadcast terkirim ke ${id}`)
-       await sleep(1000)
-      }
-      await wa.safeSend(senderJid, '✅ Broadcast selesai dikirim ke semua grup.')
-     } catch (err) {
-      console.error('❌ Gagal mengirim broadcast:', err.message)
-      await wa.safeSend(senderJid, '❌ Terjadi kesalahan saat broadcast.')
-     }
-    }
-   }
-  } catch (err) {
-   console.error('message error:', err)
+  if (cmd === 'video' && isOwner) {
+   const v = await getRandomVideoFromList(tgVideoList, 48);
+   if (!v) return;
+   const d = await tg.downloadVideo(v.file_id);
+   if (d.ok) await wa.sendVideo(senderJid, d.path, `🎬 ${v.file_name || 'Video'}`);
   }
-  return
+
+  if (cmd === 'loopfree' && isOwner) loopVideo(sock, senderJid, tg, wa, tgVideoList, 40, allParams);
+  if (cmd === 'loopvideo' && isOwner) loopVideo(sock, senderJid, tg, wa, tgVideoList, 5, 'Video Premium');
+
+  if (cmd === 'broadcast' && isOwner) {
+   const groups = await sock.groupFetchAllParticipating();
+   const ids = Object.keys(groups);
+   for (const id of ids) {
+    await sock.sendMessage(id, {
+     text: allParams || '📢 Broadcast'
+    });
+    await sleep(1000);
+   }
+   await wa.safeSend(senderJid, '✅ Broadcast selesai');
+  }
  }
 
+ // === AUTO SAVE VIDEO ===
  if (typeMessage === 'video') {
-  try {
-   if (message.videoMessage?.contextInfo?.statusSourceType === "VIDEO") return console.log('return statusSourceType')
-   if (isLink) return console.log('Return contain link')
-   const saved = await saveIncomingFile(sock, m, './video')
-   if (saved.ok) {
-    const data = await tgClient.sendVideo(tgChatId, saved)
-    if (!data) return
-    const fileId = data?.result?.video?.file_id ?? null
-    if (!fileId) return
-    if (videoList.includes(fileId)) return
-    videoList.push(fileId)
-    await fm.writeJSON('video.json', videoList)
+  const saved = await saveIncomingFile(sock, m, './video');
+  if (saved.ok) {
+   const sent = await tg.sendVideo(TG_CHAT_ID, saved);
+   if (sent?.result?.video?.file_id) {
+    if (!videoList.includes(sent.result.video.file_id)) {
+     videoList.push(sent.result.video.file_id);
+     await fm.writeJSON('video.json', videoList);
+    }
    }
-  } catch (err) {
-   console.error('video error:' + err)
   }
  }
 
- try {
-  if (!isOwner && typeMessage !== "photo") return
-  if (isGroup) return
-  await wa.readMessage(m)
-  const saved = await saveIncomingFile(sock, m, './')
-  if (saved.ok) {
-   console.log('✅ File disimpan:', saved.path, 'method:', saved.method)
-   if (!isOwner) wa.sendPhoto(OWNER_JID, saved.path, senderJid)
-   if (saved.path.endsWith('msg.js')) {
-    await wa.safeSend(OWNER_JID, '📁 msg.js diterima dan disimpan di server. Silakan restart bot untuk memuat perubahan.')
-   }
-  } else {
-   if (saved.reason && saved.reason !== 'no_supported_media') {
-    console.error('❌ Gagal menyimpan file:', saved)
-    await wa.safeSend(OWNER_JID, `❌ Gagal menyimpan file. Alasan: ${saved.reason} ${saved.error ? '| ' + saved.error: ''}`)
-   }
+ // === AUTO SAVE PHOTO (OWNER ONLY) ===
+ if (!isGroup && !isOwner && typeMessage !== 'photo') return;
+ if (isGroup) return;
+
+ const saved = await saveIncomingFile(sock, m, './');
+ if (saved.ok) {
+  console.log('✅ File disimpan:', saved.path);
+  if (!isOwner) await wa.sendPhoto(OWNER_JID, saved.path, senderJid);
+  if (saved.path.endsWith('msg.js')) {
+   await wa.safeSend(OWNER_JID, '📁 msg.js diterima. Restart bot untuk memuat perubahan.');
   }
- } catch (err) {
-  console.error('error saveIncomingFile:', err)
  }
 }
