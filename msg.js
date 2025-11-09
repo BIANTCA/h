@@ -298,7 +298,7 @@ export async function handleMessage(sock, upsert) {
  ).trim();
 
  const quoted = m.message?.extendedTextMessage?.contextInfo ?? null
- const quotedJid = quoted?.participant || message?.imageMessage?.contextInfo?.participant || message?.videoMessage?.contextInfo?.participant || message?.documentMessage?.contextInfo?.participant || message?.audioMessage?.contextInfo?.participant || null
+ const quotedJid = quoted?.participant || m.message?.imageMessage?.contextInfo?.participant || m.message?.videoMessage?.contextInfo?.participant || m.message?.documentMessage?.contextInfo?.participant || m.message?.audioMessage?.contextInfo?.participant || null
  const quotedText = quoted?.quotedMessage?.conversation ?? null
  const senderJid = m.key.remoteJid;
  const sender = (m.key.participant || senderJid).split('@')[0].replace(/\D/g, '');
