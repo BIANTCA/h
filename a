@@ -1,264 +1,88 @@
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
 local player = Players.LocalPlayer
-
--- STATE VARIABLES
-local guiEnabled = false
-local brightLoop
-local highlightActive = false
-local nofogActive = false
-local highlightObjects = {}
+local mouse = player:GetMouse()
 
 -- Remove old GUI if re-running
-if player.PlayerGui:FindFirstChild("MainMenuGUI") then
-    player.PlayerGui.MainMenuGUI:Destroy()
+if player.PlayerGui:FindFirstChild("CoolController") then
+    player.PlayerGui.CoolController:Destroy()
 end
 
 -- Create GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "MainMenuGUI"
+gui.Name = "CoolController"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- Main frame (initially hidden)
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 320)
-frame.Position = UDim2.new(0, 25, 0.5, -160)
-frame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+frame.Size = UDim2.new(0, 320, 0, 360)
+frame.Position = UDim2.new(0.7, 0, 0.25, 0)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 frame.Visible = false
 frame.Parent = gui
 
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 14)
+
+local stroke = Instance.new("UIStroke", frame)
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(120, 120, 120)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 -- Title
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 40)
 title.BackgroundTransparency = 1
 title.Text = "Menu Utama"
-title.Font = Enum.Font.GothamMedium
-title.TextColor3 = Color3.fromRGB(220, 220, 220)
-title.TextSize = 18
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.fromRGB(200, 200, 200)
+title.TextSize = 20
 title.Parent = frame
 
--- Close button
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0, 5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
-closeBtn.Text = "✕"
-closeBtn.TextColor3 = Color3.white
-closeBtn.TextSize = 18
-closeBtn.BorderSizePixel = 0
-closeBtn.AutoButtonColor = false
-closeBtn.Parent = frame
-
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
-
--- Button container
-local buttonContainer = Instance.new("ScrollingFrame")
-buttonContainer.Size = UDim2.new(1, -20, 1, -60)
-buttonContainer.Position = UDim2.new(0, 10, 0, 50)
-buttonContainer.BackgroundTransparency = 1
-buttonContainer.BorderSizePixel = 0
-buttonContainer.ScrollBarThickness = 6
-buttonContainer.ScrollBarImageColor3 = Color3.fromRGB(70, 70, 75)
-buttonContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-buttonContainer.Parent = frame
-
-local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 8)
-layout.SortOrder = Enum.SortOrder.LayoutOrder
-layout.Parent = buttonContainer
-
--- Toggle button (25px dari kiri, di tengah vertikal)
+-- Toggle button (positioned left-center with 25px from left)
 local toggleButton = Instance.new("TextButton")
 toggleButton.Name = "ToggleButton"
-toggleButton.Size = UDim2.new(0, 40, 0, 40)
-toggleButton.Position = UDim2.new(0, 25, 0.5, -20)
-toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
+toggleButton.Size = UDim2.new(0, 50, 0, 50)
+toggleButton.Position = UDim2.new(0, 25, 0.5, -25)
+toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 toggleButton.Text = "⚙"
-toggleButton.TextColor3 = Color3.fromRGB(220, 220, 220)
-toggleButton.TextSize = 20
+toggleButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+toggleButton.TextSize = 24
 toggleButton.ZIndex = 100
 toggleButton.BorderSizePixel = 0
 toggleButton.AutoButtonColor = false
 toggleButton.Parent = gui
 
-Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 10)
 
--- FUNCTION: Create toggle button
-local function createToggleButton(text, initialState)
-    local button = Instance.new("TextButton")
-    button.Text = text .. ": " .. (initialState and "ON" or "OFF")
-    button.Size = UDim2.new(1, 0, 0, 40)
-    button.BackgroundColor3 = initialState and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
-    button.TextColor3 = Color3.white
-    button.TextSize = 14
-    button.Font = Enum.Font.Gotham
-    button.AutoButtonColor = false
-    button.BorderSizePixel = 0
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
-    corner.Parent = button
-    
-    button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = initialState and Color3.fromRGB(70, 140, 70) or Color3.fromRGB(85, 85, 90)
-    end)
-    
-    button.MouseLeave:Connect(function()
-        button.BackgroundColor3 = initialState and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
-    end)
-    
-    button.MouseButton1Down:Connect(function()
-        button.BackgroundColor3 = initialState and Color3.fromRGB(50, 100, 50) or Color3.fromRGB(60, 60, 65)
-    end)
-    
-    button.MouseButton1Up:Connect(function()
-        button.BackgroundColor3 = initialState and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
-    end)
-    
-    return button
-end
+local toggleStroke = Instance.new("UIStroke", toggleButton)
+toggleStroke.Thickness = 2
+toggleStroke.Color = Color3.fromRGB(150, 150, 150)
+toggleStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- FUNCTION: Fullbright toggle
-local function toggleFullbright()
-    if brightLoop then
-        brightLoop:Disconnect()
-        brightLoop = nil
-        return false
-    else
-        local function updateLighting()
-            Lighting.Brightness = 2
-            Lighting.ClockTime = 14
-            Lighting.FogEnd = 100000
-            Lighting.GlobalShadows = false
-            Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-        end
-        
-        brightLoop = RunService.RenderStepped:Connect(updateLighting)
-        updateLighting()
-        return true
-    end
-end
-
--- FUNCTION: Highlight toggle
-local function toggleHighlight()
-    highlightActive = not highlightActive
-    
-    if highlightActive then
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= player and plr.Character and not highlightObjects[plr] then
-                local highlight = Instance.new("Highlight")
-                highlight.FillColor = Color3.fromRGB(255, 255, 255)
-                highlight.OutlineColor = Color3.fromRGB(50, 50, 50)
-                highlight.FillTransparency = 0.7
-                highlight.Parent = plr.Character
-                highlightObjects[plr] = highlight
-            end
-        end
-    else
-        for plr, highlight in pairs(highlightObjects) do
-            if highlight then 
-                highlight:Destroy() 
-            end
-        end
-        highlightObjects = {}
-    end
-    
-    return highlightActive
-end
-
--- FUNCTION: Nofog toggle
-local function toggleNofog()
-    nofogActive = not nofogActive
-    
-    if nofogActive then
-        Lighting.FogEnd = 100000
-        for _, obj in pairs(Lighting:GetDescendants()) do
-            if obj:IsA("Atmosphere") then
-                obj:Destroy()
-            end
-        end
-    else
-        Lighting.FogEnd = 10000
-    end
-    
-    return nofogActive
-end
-
--- Setup buttons in menu
-local function setupMenuButtons()
-    buttonContainer:ClearAllChildren()
-    
-    -- Fullbright button
-    local fullbrightBtn = createToggleButton("Fullbright", brightLoop ~= nil)
-    fullbrightBtn.LayoutOrder = 1
-    fullbrightBtn.Parent = buttonContainer
-    
-    fullbrightBtn.MouseButton1Click:Connect(function()
-        local enabled = toggleFullbright()
-        fullbrightBtn.Text = "Fullbright: " .. (enabled and "ON" or "OFF")
-        fullbrightBtn.BackgroundColor3 = enabled and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
-    end)
-    
-    -- Highlight button
-    local highlightBtn = createToggleButton("Highlight", highlightActive)
-    highlightBtn.LayoutOrder = 2
-    highlightBtn.Parent = buttonContainer
-    
-    highlightBtn.MouseButton1Click:Connect(function()
-        local enabled = toggleHighlight()
-        highlightBtn.Text = "Highlight: " .. (enabled and "ON" or "OFF")
-        highlightBtn.BackgroundColor3 = enabled and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
-    end)
-    
-    -- Nofog button
-    local nofogBtn = createToggleButton("Nofog", nofogActive)
-    nofogBtn.LayoutOrder = 3
-    nofogBtn.Parent = buttonContainer
-    
-    nofogBtn.MouseButton1Click:Connect(function()
-        local enabled = toggleNofog()
-        nofogBtn.Text = "Nofog: " .. (enabled and "ON" or "OFF")
-        nofogBtn.BackgroundColor3 = enabled and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
-    end)
-    
-    -- Update canvas size
-    buttonContainer.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
-end
-
--- Toggle GUI function
+-- Toggle function
 local function toggleGUI()
-    guiEnabled = not guiEnabled
-    frame.Visible = guiEnabled
+    frame.Visible = not frame.Visible
     
-    if guiEnabled then
+    if frame.Visible then
         toggleButton.Text = "✕"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
+        toggleButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
         toggleButton.TextColor3 = Color3.new(1, 1, 1)
-        setupMenuButtons()
+        toggleStroke.Color = Color3.fromRGB(255, 100, 100)
     else
         toggleButton.Text = "⚙"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
-        toggleButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+        toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        toggleButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+        toggleStroke.Color = Color3.fromRGB(150, 150, 150)
     end
 end
 
--- Connect buttons
+-- Connect toggle button
 toggleButton.MouseButton1Click:Connect(toggleGUI)
-closeBtn.MouseButton1Click:Connect(function()
-    guiEnabled = false
-    frame.Visible = false
-    toggleButton.Text = "⚙"
-    toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
-    toggleButton.TextColor3 = Color3.fromRGB(220, 220, 220)
-end)
 
 -- Keybind toggle (RightControl)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -267,7 +91,299 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Auto-start features
-task.wait(1)
-toggleFullbright()
-toggleNofog()
+---------------------------------------------
+-- TOGGLE HIGHLIGHT ON / OFF
+---------------------------------------------
+local highlightActive = false
+local highlightObjects = {}
+
+-- UI Toggle Highlight
+local highlightToggle = Instance.new("TextButton")
+highlightToggle.Name = "HighlightToggle"
+highlightToggle.Size = UDim2.new(0, 140, 0, 30)
+highlightToggle.Position = UDim2.new(0.5, -70, 0, 50)
+highlightToggle.Text = "Highlight: OFF"
+highlightToggle.Font = Enum.Font.GothamSemibold
+highlightToggle.TextSize = 16
+highlightToggle.TextColor3 = Color3.new(1,1,1)
+highlightToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Instance.new("UICorner", highlightToggle).CornerRadius = UDim.new(0, 8)
+highlightToggle.Parent = frame
+
+-- Fungsi bersihkan semua highlight
+local function clearHighlights()
+	for _, h in pairs(highlightObjects) do
+		if h then h:Destroy() end
+	end
+	highlightObjects = {}
+end
+
+-- Fungsi update highlight
+local function updateHighlights()
+	if not highlightActive then clearHighlights() return end
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= player and plr.Character and not highlightObjects[plr] then
+			local h = Instance.new("Highlight")
+			h.FillColor = Color3.fromRGB(255, 50, 50)
+			h.OutlineColor = Color3.fromRGB(100, 0, 0)
+			h.FillTransparency = 0.3
+			h.Parent = plr.Character
+			highlightObjects[plr] = h
+		end
+	end
+end
+
+-- Event tombol highlight
+highlightToggle.MouseButton1Click:Connect(function()
+	highlightActive = not highlightActive
+	highlightToggle.Text = highlightActive and "Highlight: ON" or "Highlight: OFF"
+	highlightToggle.BackgroundColor3 = highlightActive and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(80, 80, 80)
+	updateHighlights()
+end)
+
+-- Loop cek pemain baru / hilang
+RunService.RenderStepped:Connect(function()
+	if highlightActive then updateHighlights() end
+end)
+
+---------------------------------------------
+-- NO FOG & FULLBRIGHT
+---------------------------------------------
+local brightLoop = nil
+
+local function nofog()
+    local Lighting = game:GetService("Lighting")
+    Lighting.FogEnd = 100000
+    for _, obj in pairs(Lighting:GetDescendants()) do
+        if obj:IsA("Atmosphere") then
+            obj:Destroy()
+        end
+    end
+end
+
+local function loopfullbright()
+    local Lighting = game:GetService("Lighting")
+    if brightLoop then brightLoop:Disconnect() end
+    local function updateLighting()
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    end
+    brightLoop = RunService.RenderStepped:Connect(updateLighting)
+    updateLighting()
+end
+
+local function unloopfullbright()
+    if brightLoop then brightLoop:Disconnect() brightLoop = nil end
+end
+
+-- UI Toggle Fullbright
+local fullbrightToggle = Instance.new("TextButton")
+fullbrightToggle.Name = "FullbrightToggle"
+fullbrightToggle.Size = UDim2.new(0, 140, 0, 30)
+fullbrightToggle.Position = UDim2.new(0.5, -70, 0, 90)
+fullbrightToggle.Text = "Fullbright: OFF"
+fullbrightToggle.Font = Enum.Font.GothamSemibold
+fullbrightToggle.TextSize = 16
+fullbrightToggle.TextColor3 = Color3.new(1,1,1)
+fullbrightToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Instance.new("UICorner", fullbrightToggle).CornerRadius = UDim.new(0, 8)
+fullbrightToggle.Parent = frame
+
+local fullbrightActive = false
+fullbrightToggle.MouseButton1Click:Connect(function()
+    fullbrightActive = not fullbrightActive
+    if fullbrightActive then
+        nofog()
+        loopfullbright()
+        fullbrightToggle.Text = "Fullbright: ON"
+        fullbrightToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    else
+        unloopfullbright()
+        fullbrightToggle.Text = "Fullbright: OFF"
+        fullbrightToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    end
+end)
+
+---------------------------------------------
+-- C-FLY
+---------------------------------------------
+local CFspeed = 100
+local CFloop = nil
+local CFhead = nil
+
+local function startCFly()
+    if CFloop then return end
+    local char = player.Character or player.CharacterAdded:Wait()
+    CFhead = char:WaitForChild("Head")
+    CFhead.Anchored = true
+    
+    CFloop = RunService.Heartbeat:Connect(function(deltaTime)
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum then return end
+        local moveDirection = hum.MoveDirection * (CFspeed * deltaTime)
+        local headCFrame = CFhead.CFrame
+        local camera = workspace.CurrentCamera
+        local cameraCFrame = camera.CFrame
+        local cameraOffset = headCFrame:ToObjectSpace(cameraCFrame).Position
+        cameraCFrame = cameraCFrame * CFrame.new(-cameraOffset.X, -cameraOffset.Y, -cameraOffset.Z + 1)
+        local cameraPosition = cameraCFrame.Position
+        local headPosition = headCFrame.Position
+
+        local objectSpaceVelocity = CFrame.new(cameraPosition, Vector3.new(headPosition.X, cameraPosition.Y, headPosition.Z)):VectorToObjectSpace(moveDirection)
+        CFhead.CFrame = CFrame.new(headPosition) * (cameraCFrame - cameraPosition) * CFrame.new(objectSpaceVelocity)
+    end)
+end
+
+local function stopCFly()
+    if CFloop then
+        CFloop:Disconnect()
+        CFloop = nil
+    end
+    if CFhead then
+        CFhead.Anchored = false
+        CFhead = nil
+    end
+    local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+    if hum then hum.PlatformStand = false end
+end
+
+-- UI Toggle C-Fly
+local cflyToggle = Instance.new("TextButton")
+cflyToggle.Name = "CFlyToggle"
+cflyToggle.Size = UDim2.new(0, 140, 0, 30)
+cflyToggle.Position = UDim2.new(0.5, -70, 0, 130)
+cflyToggle.Text = "C-Fly: OFF"
+cflyToggle.Font = Enum.Font.GothamSemibold
+cflyToggle.TextSize = 16
+cflyToggle.TextColor3 = Color3.new(1,1,1)
+cflyToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Instance.new("UICorner", cflyToggle).CornerRadius = UDim.new(0, 8)
+cflyToggle.Parent = frame
+
+local cflyActive = false
+cflyToggle.MouseButton1Click:Connect(function()
+    cflyActive = not cflyActive
+    if cflyActive then
+        startCFly()
+        cflyToggle.Text = "C-Fly: ON"
+        cflyToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    else
+        stopCFly()
+        cflyToggle.Text = "C-Fly: OFF"
+        cflyToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    end
+end)
+
+---------------------------------------------
+-- TP TOOL (tombol, bukan toggle)
+---------------------------------------------
+local tpToolButton = Instance.new("TextButton")
+tpToolButton.Name = "TpToolButton"
+tpToolButton.Size = UDim2.new(0, 140, 0, 30)
+tpToolButton.Position = UDim2.new(0.5, -70, 0, 170)
+tpToolButton.Text = "Give TpTool"
+tpToolButton.Font = Enum.Font.GothamSemibold
+tpToolButton.TextSize = 16
+tpToolButton.TextColor3 = Color3.new(1,1,1)
+tpToolButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Instance.new("UICorner", tpToolButton).CornerRadius = UDim.new(0, 8)
+tpToolButton.Parent = frame
+
+tpToolButton.MouseButton1Click:Connect(function()
+    local TpTool = Instance.new("Tool")
+    TpTool.Name = "Teleport Tool"
+    TpTool.RequiresHandle = false
+    TpTool.Parent = player.Backpack
+    TpTool.Activated:Connect(function()
+        local Char = player.Character or workspace:FindFirstChild(player.Name)
+        local HRP = Char and Char:FindFirstChild("HumanoidRootPart")
+        if not Char or not HRP then
+            return warn("Failed to find HumanoidRootPart")
+        end
+        HRP.CFrame = CFrame.new(mouse.Hit.X, mouse.Hit.Y + 3, mouse.Hit.Z, select(4, HRP.CFrame:components()))
+    end)
+end)
+
+---------------------------------------------
+-- NOCLIP TOGGLE
+---------------------------------------------
+local noclipActive = false
+local Noclipping = nil
+
+local function NoclipLoop()
+    if not noclipActive or not player.Character then return end
+    for _, child in pairs(player.Character:GetDescendants()) do
+        if child:IsA("BasePart") and child.CanCollide == true then
+            child.CanCollide = false
+        end
+    end
+end
+
+local function startNoclip()
+    noclipActive = true
+    Noclipping = RunService.Stepped:Connect(NoclipLoop)
+end
+
+local function stopNoclip()
+    noclipActive = false
+    if Noclipping then
+        Noclipping:Disconnect()
+        Noclipping = nil
+    end
+    -- restore collisions
+    if player.Character then
+        for _, child in pairs(player.Character:GetDescendants()) do
+            if child:IsA("BasePart") then
+                child.CanCollide = true
+            end
+        end
+    end
+end
+
+-- UI Toggle Noclip
+local noclipToggle = Instance.new("TextButton")
+noclipToggle.Name = "NoclipToggle"
+noclipToggle.Size = UDim2.new(0, 140, 0, 30)
+noclipToggle.Position = UDim2.new(0.5, -70, 0, 210)
+noclipToggle.Text = "Noclip: OFF"
+noclipToggle.Font = Enum.Font.GothamSemibold
+noclipToggle.TextSize = 16
+noclipToggle.TextColor3 = Color3.new(1,1,1)
+noclipToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Instance.new("UICorner", noclipToggle).CornerRadius = UDim.new(0, 8)
+noclipToggle.Parent = frame
+
+noclipToggle.MouseButton1Click:Connect(function()
+    noclipActive = not noclipActive
+    if noclipActive then
+        startNoclip()
+        noclipToggle.Text = "Noclip: ON"
+        noclipToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    else
+        stopNoclip()
+        noclipToggle.Text = "Noclip: OFF"
+        noclipToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    end
+end)
+
+---------------------------------------------
+-- DESTROY GUI
+---------------------------------------------
+local destroyButton = Instance.new("TextButton")
+destroyButton.Name = "DestroyButton"
+destroyButton.Size = UDim2.new(0, 140, 0, 30)
+destroyButton.Position = UDim2.new(0.5, -70, 0, 250)
+destroyButton.Text = "Destroy GUI"
+destroyButton.Font = Enum.Font.GothamSemibold
+destroyButton.TextSize = 16
+destroyButton.TextColor3 = Color3.new(1,1,1)
+destroyButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+Instance.new("UICorner", destroyButton).CornerRadius = UDim.new(0, 8)
+destroyButton.Parent = frame
+
+destroyButton.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
