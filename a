@@ -1,170 +1,102 @@
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
+local player = Players.LocalPlayer
 
-local KEYBIND = Enum.KeyCode.RightControl
-local TOGGLE_SIZE = UDim2.new(0, 40, 0, 40)
-local TOGGLE_POSITION = UDim2.new(0, 20, 0, 20)
-
+-- STATE VARIABLES
 local guiEnabled = false
 local brightLoop
-local chmsEnabled = false
-local toggleButton
-local mainFrame
-local currentPage = "main"
-local buttonContainer
+local highlightActive = false
+local nofogActive = false
+local highlightObjects = {}
 
-function createToggleButton()
-    toggleButton = Instance.new("TextButton")
-    toggleButton.Name = "FrameworkToggle"
-    toggleButton.Size = TOGGLE_SIZE
-    toggleButton.Position = TOGGLE_POSITION
-    toggleButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-    toggleButton.Text = "⚙"
-    toggleButton.TextColor3 = Color3.white
-    toggleButton.TextSize = 20
-    toggleButton.ZIndex = 100
-    toggleButton.BorderSizePixel = 0
-    toggleButton.AutoButtonColor = false
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = toggleButton
-    
-    toggleButton.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-    
-    toggleButton.MouseButton1Click:Connect(function()
-        guiEnabled = not guiEnabled
-        if guiEnabled then
-            showMainMenu()
-            toggleButton.Text = "✕"
-            toggleButton.BackgroundColor3 = Color3.fromRGB(215, 0, 0)
-        else
-            hideAllMenus()
-            toggleButton.Text = "⚙"
-            toggleButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-        end
-    end)
+-- Remove old GUI if re-running
+if player.PlayerGui:FindFirstChild("MainMenuGUI") then
+    player.PlayerGui.MainMenuGUI:Destroy()
 end
 
-function createMainMenu()
-    mainFrame = Instance.new("Frame")
-    mainFrame.Name = "MainMenu"
-    mainFrame.Size = UDim2.new(0, 250, 0, 300)
-    mainFrame.Position = UDim2.new(0, 70, 0, 20)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    mainFrame.BorderSizePixel = 0
-    mainFrame.Visible = false
-    mainFrame.ZIndex = 99
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = mainFrame
-    
-    local title = Instance.new("TextLabel")
-    title.Name = "Title"
-    title.Text = "MENU"
-    title.Size = UDim2.new(1, 0, 0, 40)
-    title.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    title.TextColor3 = Color3.white
-    title.TextSize = 18
-    title.Font = Enum.Font.GothamBold
-    title.Parent = mainFrame
-    
-    local titleCorner = Instance.new("UICorner")
-    titleCorner.CornerRadius = UDim.new(0, 8, 0, 0)
-    titleCorner.Parent = title
-    
-    buttonContainer = Instance.new("ScrollingFrame")
-    buttonContainer.Name = "ButtonContainer"
-    buttonContainer.Size = UDim2.new(1, -10, 1, -50)
-    buttonContainer.Position = UDim2.new(0, 5, 0, 45)
-    buttonContainer.BackgroundTransparency = 1
-    buttonContainer.BorderSizePixel = 0
-    buttonContainer.ScrollBarThickness = 6
-    buttonContainer.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 110)
-    buttonContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-    buttonContainer.Parent = mainFrame
-    
-    local layout = Instance.new("UIListLayout")
-    layout.Padding = UDim.new(0, 5)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Parent = buttonContainer
-    
-    mainFrame.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-end
+-- Create GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "MainMenuGUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
 
-function createPageMenu(pageName, title)
-    local pageFrame = Instance.new("Frame")
-    pageFrame.Name = pageName .. "Page"
-    pageFrame.Size = UDim2.new(0, 250, 0, 300)
-    pageFrame.Position = UDim2.new(0, 70, 0, 20)
-    pageFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    pageFrame.BorderSizePixel = 0
-    pageFrame.Visible = false
-    pageFrame.ZIndex = 99
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = pageFrame
-    
-    local titleBar = Instance.new("Frame")
-    titleBar.Name = "TitleBar"
-    titleBar.Size = UDim2.new(1, 0, 0, 40)
-    titleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    titleBar.Parent = pageFrame
-    
-    local titleCorner = Instance.new("UICorner")
-    titleCorner.CornerRadius = UDim.new(0, 8, 0, 0)
-    titleCorner.Parent = titleBar
-    
-    local pageTitle = Instance.new("TextLabel")
-    pageTitle.Name = "PageTitle"
-    pageTitle.Text = title
-    pageTitle.Size = UDim2.new(0.8, 0, 1, 0)
-    pageTitle.Position = UDim2.new(0, 10, 0, 0)
-    pageTitle.BackgroundTransparency = 1
-    pageTitle.TextColor3 = Color3.white
-    pageTitle.TextSize = 18
-    pageTitle.Font = Enum.Font.GothamBold
-    pageTitle.TextXAlignment = Enum.TextXAlignment.Left
-    pageTitle.Parent = titleBar
-    
-    local backButton = createButton("←", UDim2.new(0, 40, 0, 30))
-    backButton.Position = UDim2.new(1, -50, 0, 5)
-    backButton.Parent = titleBar
-    backButton.MouseButton1Click:Connect(function()
-        hidePage(pageName)
-        showMainMenu()
-    end)
-    
-    local contentFrame = Instance.new("ScrollingFrame")
-    contentFrame.Name = "ContentFrame"
-    contentFrame.Size = UDim2.new(1, -10, 1, -50)
-    contentFrame.Position = UDim2.new(0, 5, 0, 45)
-    contentFrame.BackgroundTransparency = 1
-    contentFrame.BorderSizePixel = 0
-    contentFrame.ScrollBarThickness = 6
-    contentFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 110)
-    contentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    contentFrame.Parent = pageFrame
-    
-    local layout = Instance.new("UIListLayout")
-    layout.Padding = UDim.new(0, 5)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Parent = contentFrame
-    
-    pageFrame.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-    
-    return contentFrame
-end
+-- Main frame (initially hidden)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 320)
+frame.Position = UDim2.new(0, 25, 0.5, -160)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Visible = false
+frame.Parent = gui
 
-function createButton(text, size)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundTransparency = 1
+title.Text = "Menu Utama"
+title.Font = Enum.Font.GothamMedium
+title.TextColor3 = Color3.fromRGB(220, 220, 220)
+title.TextSize = 18
+title.Parent = frame
+
+-- Close button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.white
+closeBtn.TextSize = 18
+closeBtn.BorderSizePixel = 0
+closeBtn.AutoButtonColor = false
+closeBtn.Parent = frame
+
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+-- Button container
+local buttonContainer = Instance.new("ScrollingFrame")
+buttonContainer.Size = UDim2.new(1, -20, 1, -60)
+buttonContainer.Position = UDim2.new(0, 10, 0, 50)
+buttonContainer.BackgroundTransparency = 1
+buttonContainer.BorderSizePixel = 0
+buttonContainer.ScrollBarThickness = 6
+buttonContainer.ScrollBarImageColor3 = Color3.fromRGB(70, 70, 75)
+buttonContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+buttonContainer.Parent = frame
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 8)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = buttonContainer
+
+-- Toggle button (25px dari kiri, di tengah vertikal)
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleButton"
+toggleButton.Size = UDim2.new(0, 40, 0, 40)
+toggleButton.Position = UDim2.new(0, 25, 0.5, -20)
+toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
+toggleButton.Text = "⚙"
+toggleButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+toggleButton.TextSize = 20
+toggleButton.ZIndex = 100
+toggleButton.BorderSizePixel = 0
+toggleButton.AutoButtonColor = false
+toggleButton.Parent = gui
+
+Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 8)
+
+-- FUNCTION: Create toggle button
+local function createToggleButton(text, initialState)
     local button = Instance.new("TextButton")
-    button.Text = text
-    button.Size = size or UDim2.new(1, -10, 0, 40)
-    button.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+    button.Text = text .. ": " .. (initialState and "ON" or "OFF")
+    button.Size = UDim2.new(1, 0, 0, 40)
+    button.BackgroundColor3 = initialState and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
     button.TextColor3 = Color3.white
     button.TextSize = 14
     button.Font = Enum.Font.Gotham
@@ -176,297 +108,166 @@ function createButton(text, size)
     corner.Parent = button
     
     button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(70, 70, 75)
+        button.BackgroundColor3 = initialState and Color3.fromRGB(70, 140, 70) or Color3.fromRGB(85, 85, 90)
     end)
     
     button.MouseLeave:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+        button.BackgroundColor3 = initialState and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
     end)
     
     button.MouseButton1Down:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(90, 90, 95)
+        button.BackgroundColor3 = initialState and Color3.fromRGB(50, 100, 50) or Color3.fromRGB(60, 60, 65)
     end)
     
     button.MouseButton1Up:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(70, 70, 75)
+        button.BackgroundColor3 = initialState and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
     end)
     
     return button
 end
 
-function showMainMenu()
-    currentPage = "main"
-    mainFrame.Visible = true
-    
-    for _, page in pairs(Players.LocalPlayer.PlayerGui:GetChildren()) do
-        if page.Name:find("Page$") then
-            page.Visible = false
-        end
-    end
-end
-
-function showPage(pageName)
-    currentPage = pageName
-    mainFrame.Visible = false
-    
-    local page = Players.LocalPlayer.PlayerGui:FindFirstChild(pageName .. "Page")
-    if page then
-        page.Visible = true
-    end
-end
-
-function hidePage(pageName)
-    local page = Players.LocalPlayer.PlayerGui:FindFirstChild(pageName .. "Page")
-    if page then
-        page.Visible = false
-    end
-end
-
-function hideAllMenus()
-    mainFrame.Visible = false
-    for _, page in pairs(Players.LocalPlayer.PlayerGui:GetChildren()) do
-        if page.Name:find("Page$") then
-            page.Visible = false
-        end
-    end
-end
-
-function nofog()
-    Lighting.FogEnd = 100000
-    for _, obj in pairs(Lighting:GetDescendants()) do
-        if obj:IsA("Atmosphere") then
-            obj:Destroy()
-        end
-    end
-end
-
-function loopfullbright()
-    if brightLoop then
-        brightLoop:Disconnect()
-    end
-    
-    local function updateLighting()
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 14
-        Lighting.FogEnd = 100000
-        Lighting.GlobalShadows = false
-        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-    end
-    
-    brightLoop = RunService.RenderStepped:Connect(updateLighting)
-    updateLighting()
-end
-
-function unloopfullbright()
+-- FUNCTION: Fullbright toggle
+local function toggleFullbright()
     if brightLoop then
         brightLoop:Disconnect()
         brightLoop = nil
-    end
-end
-
-local function CHMS(player)
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        for _, part in pairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                local chams = Instance.new("BoxHandleAdornment")
-                chams.Name = player.Name .. "_CHMS"
-                chams.Adornee = part
-                chams.AlwaysOnTop = true
-                chams.ZIndex = 10
-                chams.Size = part.Size
-                chams.Transparency = 0.3
-                chams.Color3 = Color3.new(1, 0, 0)
-                chams.Parent = player.Character
-            end
-        end
-    end
-end
-
-local function clearCHMS()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Character then
-            for _, obj in pairs(player.Character:GetDescendants()) do
-                if obj.Name:find("_CHMS") then
-                    obj:Destroy()
-                end
-            end
-        end
-    end
-end
-
-function toggleChams()
-    if chmsEnabled then
-        chmsEnabled = false
-        clearCHMS()
         return false
     else
-        chmsEnabled = true
-        local localPlayer = Players.LocalPlayer
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= localPlayer then
-                CHMS(player)
-            end
+        local function updateLighting()
+            Lighting.Brightness = 2
+            Lighting.ClockTime = 14
+            Lighting.FogEnd = 100000
+            Lighting.GlobalShadows = false
+            Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
         end
         
-        Players.PlayerAdded:Connect(function(player)
-            if chmsEnabled then
-                CHMS(player)
-            end
-        end)
-        
+        brightLoop = RunService.RenderStepped:Connect(updateLighting)
+        updateLighting()
         return true
     end
 end
 
-function setupFramework()
-    createToggleButton()
-    createMainMenu()
+-- FUNCTION: Highlight toggle
+local function toggleHighlight()
+    highlightActive = not highlightActive
     
-    local visualsBtn = createButton("Visual", UDim2.new(1, -10, 0, 40))
-    visualsBtn.LayoutOrder = 1
-    visualsBtn.Parent = buttonContainer
+    if highlightActive then
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= player and plr.Character and not highlightObjects[plr] then
+                local highlight = Instance.new("Highlight")
+                highlight.FillColor = Color3.fromRGB(255, 255, 255)
+                highlight.OutlineColor = Color3.fromRGB(50, 50, 50)
+                highlight.FillTransparency = 0.7
+                highlight.Parent = plr.Character
+                highlightObjects[plr] = highlight
+            end
+        end
+    else
+        for plr, highlight in pairs(highlightObjects) do
+            if highlight then 
+                highlight:Destroy() 
+            end
+        end
+        highlightObjects = {}
+    end
     
-    local lightingBtn = createButton("Lighting", UDim2.new(1, -10, 0, 40))
-    lightingBtn.LayoutOrder = 2
-    lightingBtn.Parent = buttonContainer
-    
-    local playerBtn = createButton("Player", UDim2.new(1, -10, 0, 40))
-    playerBtn.LayoutOrder = 3
-    playerBtn.Parent = buttonContainer
-    
-    local visualsPage = createPageMenu("visuals", "Visual")
-    local lightingPage = createPageMenu("lighting", "Lighting")
-    local playerPage = createPageMenu("player", "Player")
-    
-    visualsBtn.MouseButton1Click:Connect(function()
-        showPage("visuals")
-        setupVisualsPage(visualsPage)
-    end)
-    
-    lightingBtn.MouseButton1Click:Connect(function()
-        showPage("lighting")
-        setupLightingPage(lightingPage)
-    end)
-    
-    playerBtn.MouseButton1Click:Connect(function()
-        showPage("player")
-        setupPlayerPage(playerPage)
-    end)
-    
-    buttonContainer.CanvasSize = UDim2.new(0, 0, 0, buttonContainer.UIListLayout.AbsoluteContentSize.Y)
+    return highlightActive
 end
 
-function setupVisualsPage(page)
-    page:ClearAllChildren()
+-- FUNCTION: Nofog toggle
+local function toggleNofog()
+    nofogActive = not nofogActive
     
-    local chamsBtn = createButton("Chams: " .. (chmsEnabled and "ON" or "OFF"))
-    chamsBtn.LayoutOrder = 1
-    chamsBtn.Parent = page
+    if nofogActive then
+        Lighting.FogEnd = 100000
+        for _, obj in pairs(Lighting:GetDescendants()) do
+            if obj:IsA("Atmosphere") then
+                obj:Destroy()
+            end
+        end
+    else
+        Lighting.FogEnd = 10000
+    end
     
-    chamsBtn.MouseButton1Click:Connect(function()
-        toggleChams()
-        chamsBtn.Text = "Chams: " .. (chmsEnabled and "ON" or "OFF")
-    end)
-    
-    page.CanvasSize = UDim2.new(0, 0, 0, page.UIListLayout.AbsoluteContentSize.Y)
+    return nofogActive
 end
 
-function setupLightingPage(page)
-    page:ClearAllChildren()
+-- Setup buttons in menu
+local function setupMenuButtons()
+    buttonContainer:ClearAllChildren()
     
-    local nofogBtn = createButton("Remove Fog")
-    nofogBtn.LayoutOrder = 1
-    nofogBtn.Parent = page
-    
-    nofogBtn.MouseButton1Click:Connect(function()
-        nofog()
-        nofogBtn.Text = "Fog Removed ✓"
-        wait(1)
-        nofogBtn.Text = "Remove Fog"
-    end)
-    
-    local fullbrightBtn = createButton("Fullbright: " .. (brightLoop and "ON" or "OFF"))
-    fullbrightBtn.LayoutOrder = 2
-    fullbrightBtn.Parent = page
+    -- Fullbright button
+    local fullbrightBtn = createToggleButton("Fullbright", brightLoop ~= nil)
+    fullbrightBtn.LayoutOrder = 1
+    fullbrightBtn.Parent = buttonContainer
     
     fullbrightBtn.MouseButton1Click:Connect(function()
-        if brightLoop then
-            unloopfullbright()
-            fullbrightBtn.Text = "Fullbright: OFF"
-        else
-            loopfullbright()
-            fullbrightBtn.Text = "Fullbright: ON"
-        end
+        local enabled = toggleFullbright()
+        fullbrightBtn.Text = "Fullbright: " .. (enabled and "ON" or "OFF")
+        fullbrightBtn.BackgroundColor3 = enabled and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
     end)
     
-    local brightnessLabel = Instance.new("TextLabel")
-    brightnessLabel.Text = "Brightness: " .. Lighting.Brightness
-    brightnessLabel.Size = UDim2.new(1, -10, 0, 30)
-    brightnessLabel.BackgroundTransparency = 1
-    brightnessLabel.TextColor3 = Color3.white
-    brightnessLabel.TextSize = 14
-    brightnessLabel.LayoutOrder = 3
-    brightnessLabel.Parent = page
+    -- Highlight button
+    local highlightBtn = createToggleButton("Highlight", highlightActive)
+    highlightBtn.LayoutOrder = 2
+    highlightBtn.Parent = buttonContainer
     
-    local brightnessSlider = Instance.new("TextBox")
-    brightnessSlider.Text = tostring(Lighting.Brightness)
-    brightnessSlider.Size = UDim2.new(1, -10, 0, 30)
-    brightnessSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    brightnessSlider.TextColor3 = Color3.white
-    brightnessSlider.TextSize = 14
-    brightnessSlider.PlaceholderText = "Brightness (0-10)"
-    brightnessSlider.LayoutOrder = 4
-    brightnessSlider.Parent = page
-    
-    local brightnessCorner = Instance.new("UICorner")
-    brightnessCorner.CornerRadius = UDim.new(0, 6)
-    brightnessCorner.Parent = brightnessSlider
-    
-    brightnessSlider.FocusLost:Connect(function()
-        local value = tonumber(brightnessSlider.Text)
-        if value then
-            Lighting.Brightness = math.clamp(value, 0, 10)
-            brightnessLabel.Text = "Brightness: " .. Lighting.Brightness
-        end
+    highlightBtn.MouseButton1Click:Connect(function()
+        local enabled = toggleHighlight()
+        highlightBtn.Text = "Highlight: " .. (enabled and "ON" or "OFF")
+        highlightBtn.BackgroundColor3 = enabled and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
     end)
     
-    page.CanvasSize = UDim2.new(0, 0, 0, page.UIListLayout.AbsoluteContentSize.Y)
+    -- Nofog button
+    local nofogBtn = createToggleButton("Nofog", nofogActive)
+    nofogBtn.LayoutOrder = 3
+    nofogBtn.Parent = buttonContainer
+    
+    nofogBtn.MouseButton1Click:Connect(function()
+        local enabled = toggleNofog()
+        nofogBtn.Text = "Nofog: " .. (enabled and "ON" or "OFF")
+        nofogBtn.BackgroundColor3 = enabled and Color3.fromRGB(60, 120, 60) or Color3.fromRGB(70, 70, 75)
+    end)
+    
+    -- Update canvas size
+    buttonContainer.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
 end
 
-function setupPlayerPage(page)
-    page:ClearAllChildren()
+-- Toggle GUI function
+local function toggleGUI()
+    guiEnabled = not guiEnabled
+    frame.Visible = guiEnabled
     
-    local flyBtn = createButton("Fly")
-    flyBtn.LayoutOrder = 1
-    flyBtn.Parent = page
-    
-    local noclipBtn = createButton("Noclip")
-    noclipBtn.LayoutOrder = 2
-    noclipBtn.Parent = page
-    
-    local speedBtn = createButton("Speed")
-    speedBtn.LayoutOrder = 3
-    speedBtn.Parent = page
-    
-    page.CanvasSize = UDim2.new(0, 0, 0, page.UIListLayout.AbsoluteContentSize.Y)
+    if guiEnabled then
+        toggleButton.Text = "✕"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
+        toggleButton.TextColor3 = Color3.new(1, 1, 1)
+        setupMenuButtons()
+    else
+        toggleButton.Text = "⚙"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
+        toggleButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+    end
 end
 
+-- Connect buttons
+toggleButton.MouseButton1Click:Connect(toggleGUI)
+closeBtn.MouseButton1Click:Connect(function()
+    guiEnabled = false
+    frame.Visible = false
+    toggleButton.Text = "⚙"
+    toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
+    toggleButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+end)
+
+-- Keybind toggle (RightControl)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == KEYBIND then
-        guiEnabled = not guiEnabled
-        if guiEnabled then
-            showMainMenu()
-            toggleButton.Text = "✕"
-            toggleButton.BackgroundColor3 = Color3.fromRGB(215, 0, 0)
-        else
-            hideAllMenus()
-            toggleButton.Text = "⚙"
-            toggleButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-        end
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.RightControl then
+        toggleGUI()
     end
 end)
 
-setupFramework()
-
-nofog()
-loopfullbright()
+-- Auto-start features
+task.wait(1)
+toggleFullbright()
+toggleNofog()
