@@ -1,23 +1,20 @@
--- FRAMEWORK SIMPLE GUI TOGGLE
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 
--- CONFIG
 local KEYBIND = Enum.KeyCode.RightControl
 local TOGGLE_SIZE = UDim2.new(0, 40, 0, 40)
 local TOGGLE_POSITION = UDim2.new(0, 20, 0, 20)
 
--- STATE VARIABLES
 local guiEnabled = false
 local brightLoop
 local chmsEnabled = false
 local toggleButton
 local mainFrame
 local currentPage = "main"
+local buttonContainer
 
--- CREATE TOGGLE BUTTON
 function createToggleButton()
     toggleButton = Instance.new("TextButton")
     toggleButton.Name = "FrameworkToggle"
@@ -51,7 +48,6 @@ function createToggleButton()
     end)
 end
 
--- CREATE MAIN MENU
 function createMainMenu()
     mainFrame = Instance.new("Frame")
     mainFrame.Name = "MainMenu"
@@ -68,7 +64,7 @@ function createMainMenu()
     
     local title = Instance.new("TextLabel")
     title.Name = "Title"
-    title.Text = "CHEAT MENU"
+    title.Text = "MENU"
     title.Size = UDim2.new(1, 0, 0, 40)
     title.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
     title.TextColor3 = Color3.white
@@ -80,7 +76,7 @@ function createMainMenu()
     titleCorner.CornerRadius = UDim.new(0, 8, 0, 0)
     titleCorner.Parent = title
     
-    local buttonContainer = Instance.new("ScrollingFrame")
+    buttonContainer = Instance.new("ScrollingFrame")
     buttonContainer.Name = "ButtonContainer"
     buttonContainer.Size = UDim2.new(1, -10, 1, -50)
     buttonContainer.Position = UDim2.new(0, 5, 0, 45)
@@ -97,11 +93,8 @@ function createMainMenu()
     layout.Parent = buttonContainer
     
     mainFrame.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-    
-    return buttonContainer
 end
 
--- CREATE PAGE MENU
 function createPageMenu(pageName, title)
     local pageFrame = Instance.new("Frame")
     pageFrame.Name = pageName .. "Page"
@@ -167,7 +160,6 @@ function createPageMenu(pageName, title)
     return contentFrame
 end
 
--- BUTTON CREATOR
 function createButton(text, size)
     local button = Instance.new("TextButton")
     button.Text = text
@@ -202,12 +194,10 @@ function createButton(text, size)
     return button
 end
 
--- SHOW/HIDE FUNCTIONS
 function showMainMenu()
     currentPage = "main"
     mainFrame.Visible = true
     
-    -- Hide all pages
     for _, page in pairs(Players.LocalPlayer.PlayerGui:GetChildren()) do
         if page.Name:find("Page$") then
             page.Visible = false
@@ -241,7 +231,6 @@ function hideAllMenus()
     end
 end
 
--- NOFOG FUNCTION
 function nofog()
     Lighting.FogEnd = 100000
     for _, obj in pairs(Lighting:GetDescendants()) do
@@ -251,7 +240,6 @@ function nofog()
     end
 end
 
--- LOOP FULLBRIGHT FUNCTION
 function loopfullbright()
     if brightLoop then
         brightLoop:Disconnect()
@@ -276,7 +264,6 @@ function unloopfullbright()
     end
 end
 
--- CHAMS FUNCTION
 local function CHMS(player)
     if player.Character and player.Character:FindFirstChild("Humanoid") then
         for _, part in pairs(player.Character:GetDescendants()) do
@@ -311,7 +298,7 @@ function toggleChams()
     if chmsEnabled then
         chmsEnabled = false
         clearCHMS()
-        return "Chams DISABLED"
+        return false
     else
         chmsEnabled = true
         local localPlayer = Players.LocalPlayer
@@ -321,43 +308,36 @@ function toggleChams()
             end
         end
         
-        -- Auto update for new players
         Players.PlayerAdded:Connect(function(player)
             if chmsEnabled then
                 CHMS(player)
             end
         end)
         
-        return "Chams ENABLED"
+        return true
     end
 end
 
--- SETUP FRAMEWORK
 function setupFramework()
     createToggleButton()
-    local buttonContainer = createMainMenu()
+    createMainMenu()
     
-    -- Visual Menu Button
-    local visualsBtn = createButton("🔆 Visual Mods", UDim2.new(1, -10, 0, 40))
+    local visualsBtn = createButton("Visual", UDim2.new(1, -10, 0, 40))
     visualsBtn.LayoutOrder = 1
     visualsBtn.Parent = buttonContainer
     
-    -- Lighting Menu Button
-    local lightingBtn = createButton("💡 Lighting", UDim2.new(1, -10, 0, 40))
+    local lightingBtn = createButton("Lighting", UDim2.new(1, -10, 0, 40))
     lightingBtn.LayoutOrder = 2
     lightingBtn.Parent = buttonContainer
     
-    -- Player Menu Button
-    local playerBtn = createButton("👤 Player", UDim2.new(1, -10, 0, 40))
+    local playerBtn = createButton("Player", UDim2.new(1, -10, 0, 40))
     playerBtn.LayoutOrder = 3
     playerBtn.Parent = buttonContainer
     
-    -- Create pages
-    local visualsPage = createPageMenu("visuals", "Visual Mods")
+    local visualsPage = createPageMenu("visuals", "Visual")
     local lightingPage = createPageMenu("lighting", "Lighting")
     local playerPage = createPageMenu("player", "Player")
     
-    -- Button click handlers
     visualsBtn.MouseButton1Click:Connect(function()
         showPage("visuals")
         setupVisualsPage(visualsPage)
@@ -373,35 +353,20 @@ function setupFramework()
         setupPlayerPage(playerPage)
     end)
     
-    -- Update canvas sizes
-    buttonContainer.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
+    buttonContainer.CanvasSize = UDim2.new(0, 0, 0, buttonContainer.UIListLayout.AbsoluteContentSize.Y)
 end
 
--- SETUP PAGES
 function setupVisualsPage(page)
     page:ClearAllChildren()
     
-    -- Chams Toggle
-    local chamsBtn = createButton("🎯 Chams: " .. (chmsEnabled and "ON" or "OFF"))
+    local chamsBtn = createButton("Chams: " .. (chmsEnabled and "ON" or "OFF"))
     chamsBtn.LayoutOrder = 1
     chamsBtn.Parent = page
     
     chamsBtn.MouseButton1Click:Connect(function()
-        local status = toggleChams()
-        chamsBtn.Text = "🎯 Chams: " .. (chmsEnabled and "ON" : "OFF")
+        toggleChams()
+        chamsBtn.Text = "Chams: " .. (chmsEnabled and "ON" or "OFF")
     end)
-    
-    -- Esp Button (placeholder)
-    local espBtn = createButton("👁️ ESP (Coming Soon)")
-    espBtn.LayoutOrder = 2
-    espBtn.Parent = page
-    espBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
-    
-    -- Tracers Button (placeholder)
-    local tracersBtn = createButton("🔗 Tracers (Coming Soon)")
-    tracersBtn.LayoutOrder = 3
-    tracersBtn.Parent = page
-    tracersBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
     
     page.CanvasSize = UDim2.new(0, 0, 0, page.UIListLayout.AbsoluteContentSize.Y)
 end
@@ -409,34 +374,31 @@ end
 function setupLightingPage(page)
     page:ClearAllChildren()
     
-    -- Nofog Button
-    local nofogBtn = createButton("🌫️ Remove Fog")
+    local nofogBtn = createButton("Remove Fog")
     nofogBtn.LayoutOrder = 1
     nofogBtn.Parent = page
     
     nofogBtn.MouseButton1Click:Connect(function()
         nofog()
-        nofogBtn.Text = "🌫️ Fog Removed ✓"
+        nofogBtn.Text = "Fog Removed ✓"
         wait(1)
-        nofogBtn.Text = "🌫️ Remove Fog"
+        nofogBtn.Text = "Remove Fog"
     end)
     
-    -- Fullbright Toggle
-    local fullbrightBtn = createButton("💡 Fullbright: " .. (brightLoop and "ON" : "OFF"))
+    local fullbrightBtn = createButton("Fullbright: " .. (brightLoop and "ON" or "OFF"))
     fullbrightBtn.LayoutOrder = 2
     fullbrightBtn.Parent = page
     
     fullbrightBtn.MouseButton1Click:Connect(function()
         if brightLoop then
             unloopfullbright()
-            fullbrightBtn.Text = "💡 Fullbright: OFF"
+            fullbrightBtn.Text = "Fullbright: OFF"
         else
             loopfullbright()
-            fullbrightBtn.Text = "💡 Fullbright: ON"
+            fullbrightBtn.Text = "Fullbright: ON"
         end
     end)
     
-    -- Brightness Slider
     local brightnessLabel = Instance.new("TextLabel")
     brightnessLabel.Text = "Brightness: " .. Lighting.Brightness
     brightnessLabel.Size = UDim2.new(1, -10, 0, 30)
@@ -452,7 +414,7 @@ function setupLightingPage(page)
     brightnessSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
     brightnessSlider.TextColor3 = Color3.white
     brightnessSlider.TextSize = 14
-    brightnessSlider.PlaceholderText = "Enter brightness (0-10)"
+    brightnessSlider.PlaceholderText = "Brightness (0-10)"
     brightnessSlider.LayoutOrder = 4
     brightnessSlider.Parent = page
     
@@ -474,28 +436,21 @@ end
 function setupPlayerPage(page)
     page:ClearAllChildren()
     
-    -- Fly Button (placeholder)
-    local flyBtn = createButton("✈️ Fly (Coming Soon)")
+    local flyBtn = createButton("Fly")
     flyBtn.LayoutOrder = 1
     flyBtn.Parent = page
-    flyBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
     
-    -- Noclip Button (placeholder)
-    local noclipBtn = createButton("👻 Noclip (Coming Soon)")
+    local noclipBtn = createButton("Noclip")
     noclipBtn.LayoutOrder = 2
     noclipBtn.Parent = page
-    noclipBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
     
-    -- Speed Button (placeholder)
-    local speedBtn = createButton("⚡ Speed (Coming Soon)")
+    local speedBtn = createButton("Speed")
     speedBtn.LayoutOrder = 3
     speedBtn.Parent = page
-    speedBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
     
     page.CanvasSize = UDim2.new(0, 0, 0, page.UIListLayout.AbsoluteContentSize.Y)
 end
 
--- KEYBIND TOGGLE
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == KEYBIND then
         guiEnabled = not guiEnabled
@@ -511,10 +466,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- INITIALIZE
 setupFramework()
 
--- Auto-start nofog and fullbright
-wait(1)
 nofog()
 loopfullbright()
