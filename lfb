@@ -1,0 +1,41 @@
+function nofog()
+    local Lighting = game:GetService("Lighting")
+    Lighting.FogEnd = 100000
+    for _, obj in pairs(Lighting:GetDescendants()) do
+        if obj:IsA("Atmosphere") then
+            obj:Destroy()
+        end
+    end
+end
+
+local RunService = game:GetService("RunService")
+local brightLoop
+
+function loopfullbright()
+    local Lighting = game:GetService("Lighting")
+    
+    if brightLoop then
+        brightLoop:Disconnect()
+    end
+    
+    local function updateLighting()
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    end
+    
+    brightLoop = RunService.RenderStepped:Connect(updateLighting)
+    updateLighting()
+end
+
+function unloopfullbright()
+    if brightLoop then
+        brightLoop:Disconnect()
+        brightLoop = nil
+    end
+end
+
+nofog()
+loopfullbright()
