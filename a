@@ -1,512 +1,390 @@
+--[[
+CoolController v8 - HybridFly + Waypoint List
+Tanpa input bawah, waypoint tersimpan otomatis dan muncul di daftar klik.
+]]
+
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local mouse = player:GetMouse()
 
--- Remove old GUI if re-running
+-- Hapus GUI lama
 if player.PlayerGui:FindFirstChild("CoolController") then
-    player.PlayerGui.CoolController:Destroy()
+ player.PlayerGui.CoolController:Destroy()
 end
 
--- Create GUI
+-- GUI utama
 local gui = Instance.new("ScreenGui")
 gui.Name = "CoolController"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- Main frame (initially hidden)
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 320, 0, 400)
-frame.Position = UDim2.new(0.5, -160, 0.5, -180)
-frame.AnchorPoint = Vector2.new(0, 0)
-frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.Size = UDim2.new(0, 360, 0, 320)
+frame.Position = UDim2.new(0.5, -180, 0.5, -160)
+frame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 frame.BorderSizePixel = 0
+frame.Visible = false
 frame.Active = true
 frame.Draggable = true
-frame.Visible = false
 frame.Parent = gui
 
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 14)
-
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 local stroke = Instance.new("UIStroke", frame)
 stroke.Thickness = 2
-stroke.Color = Color3.fromRGB(120, 120, 120)
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Color = Color3.fromRGB(100, 100, 100)
 
--- Title
+-- Judul
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 50)
-title.BackgroundTransparency = 1
-title.Text = "GANTENK"
+title.Size = UDim2.new(1, 0, 0, 35)
+title.Text = "Cool Controller"
 title.Font = Enum.Font.GothamBold
-title.TextColor3 = Color3.fromRGB(200, 200, 200)
-title.TextSize = 20
+title.TextSize = 18
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(230, 230, 230)
 title.Parent = frame
 
--- GANTI ukuran & posisi toggle button agar 30 dan bisa dipindah
+-- Tombol Toggle GUI
 local toggleButton = Instance.new("TextButton")
-toggleButton.Name = "ToggleButton"
-toggleButton.Size = UDim2.new(0, 30, 0, 30)
-toggleButton.Position = UDim2.new(0, 25, 0.5, -15)   -- tengah vertikal
+toggleButton.Size = UDim2.new(0, 32, 0, 32)
+toggleButton.Position = UDim2.new(0, 20, 0.5, -16)
 toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-toggleButton.Text = "⚙"
-toggleButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+toggleButton.Text = "Open"
 toggleButton.TextSize = 14
-toggleButton.ZIndex = 100
-toggleButton.BorderSizePixel = 0
-toggleButton.AutoButtonColor = false
+toggleButton.TextColor3 = Color3.fromRGB(200, 200, 200)
 toggleButton.Parent = gui
-
 Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 6)
 
-local toggleStroke = Instance.new("UIStroke", toggleButton)
-toggleStroke.Thickness = 1
-toggleStroke.Color = Color3.fromRGB(150, 150, 150)
-
--- drag data
-local dragging = false
-local dragInput
-local dragStart
-local startPos
-
+-- Toggle drag
+local dragging, dragStart, startPos, dragInput = false, nil, nil, nil
 local function updatePos(input)
-	local delta = input.Position - dragStart
-	toggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-	                                  startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+ local delta = input.Position - dragStart
+ toggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+  startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
-
 toggleButton.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = toggleButton.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then dragging = false end
-		end)
-	end
+ if input.UserInputType == Enum.UserInputType.MouseButton1 then
+  dragging = true
+  dragStart = input.Position
+  startPos = toggleButton.Position
+  input.Changed:Connect(function()
+   if input.UserInputState == Enum.UserInputState.End then dragging = false end
+  end)
+ end
 end)
-
 toggleButton.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		dragInput = input
-	end
+ if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
 end)
-
 UserInputService.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		updatePos(input)
-	end
+ if input == dragInput and dragging then updatePos(input) end
 end)
 
--- Toggle function
 local function toggleGUI()
-	frame.Visible = not frame.Visible
-	if frame.Visible then
-		toggleButton.Text = "X"
-		toggleButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-		toggleButton.TextColor3 = Color3.new(1, 1, 1)
-		toggleStroke.Color = Color3.fromRGB(255, 100, 100)
-	else
-		toggleButton.Text = "⚙"
-		toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-		toggleButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-		toggleStroke.Color = Color3.fromRGB(150, 150, 150)
-	end
+ frame.Visible = not frame.Visible
+ toggleButton.Text = frame.Visible and "Close" or "Open"
+ toggleButton.BackgroundColor3 = frame.Visible and Color3.fromRGB(120, 0, 0) or Color3.fromRGB(70, 70, 70)
 end
-
 toggleButton.MouseButton1Click:Connect(toggleGUI)
-
-UserInputService.InputBegan:Connect(function(input, gP)
-	if not gP and input.KeyCode == Enum.KeyCode.RightControl then toggleGUI() end
+UserInputService.InputBegan:Connect(function(i,gp)
+ if not gp and i.KeyCode == Enum.KeyCode.RightControl then toggleGUI() end
 end)
 
----------------------------------------------
--- TOGGLE HIGHLIGHT ON / OFF
----------------------------------------------
-local highlightActive = false
+------------------------------------------------
+-- GRID (2 kolom)
+------------------------------------------------
+local btnHolder = Instance.new("Frame")
+btnHolder.Size = UDim2.new(1, -20, 0, 150)
+btnHolder.Position = UDim2.new(0, 10, 0, 40)
+btnHolder.BackgroundTransparency = 1
+btnHolder.Parent = frame
+
+local grid = Instance.new("UIGridLayout", btnHolder)
+grid.CellSize = UDim2.new(0, 150, 0, 32)
+grid.CellPadding = UDim2.new(0, 10, 0, 10)
+grid.FillDirectionMaxCells = 2
+grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
+grid.VerticalAlignment = Enum.VerticalAlignment.Top
+
+local function newButton(name, text)
+ local b = Instance.new("TextButton")
+ b.Name = name
+ b.Text = text
+ b.Font = Enum.Font.GothamSemibold
+ b.TextSize = 14
+ b.TextColor3 = Color3.new(1,1,1)
+ b.BackgroundColor3 = Color3.fromRGB(80,80,80)
+ Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+ b.Parent = btnHolder
+ return b
+end
+
+------------------------------------------------
+-- FITUR UTAMA
+------------------------------------------------
+local highlightActive, fullbrightActive, flyActive, noclipActive = false, false, false, false
+local brightLoop, CFloop, noclipConn = nil, nil, nil
 local highlightObjects = {}
-
--- UI Toggle Highlight
-local highlightToggle = Instance.new("TextButton")
-highlightToggle.Name = "HighlightToggle"
-highlightToggle.Size = UDim2.new(0, 140, 0, 30)
-highlightToggle.Position = UDim2.new(0.5, -70, 0, 50)
-highlightToggle.Text = "Highlight: OFF"
-highlightToggle.Font = Enum.Font.GothamSemibold
-highlightToggle.TextSize = 16
-highlightToggle.TextColor3 = Color3.new(1,1,1)
-highlightToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-Instance.new("UICorner", highlightToggle).CornerRadius = UDim.new(0, 8)
-highlightToggle.Parent = frame
-
--- Fungsi bersihkan semua highlight
-local function clearHighlights()
-	for _, h in pairs(highlightObjects) do
-		if h then h:Destroy() end
-	end
-	highlightObjects = {}
-end
-
--- Fungsi update highlight
-local function updateHighlights()
-	if not highlightActive then clearHighlights() return end
-	for _, plr in pairs(Players:GetPlayers()) do
-		if plr ~= player and plr.Character and not highlightObjects[plr] then
-			local h = Instance.new("Highlight")
-			h.FillColor = Color3.fromRGB(255, 50, 50)
-			h.OutlineColor = Color3.fromRGB(100, 0, 0)
-			h.FillTransparency = 0.3
-			h.Parent = plr.Character
-			highlightObjects[plr] = h
-		end
-	end
-end
-
--- Event tombol highlight
-highlightToggle.MouseButton1Click:Connect(function()
-	highlightActive = not highlightActive
-	highlightToggle.Text = highlightActive and "Highlight: ON" or "Highlight: OFF"
-	highlightToggle.BackgroundColor3 = highlightActive and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(80, 80, 80)
-	updateHighlights()
-end)
-
--- Loop cek pemain baru / hilang
-RunService.RenderStepped:Connect(function()
-	if highlightActive then updateHighlights() end
-end)
-
----------------------------------------------
--- NO FOG & FULLBRIGHT
----------------------------------------------
-local brightLoop = nil
-
-local function nofog()
-    local Lighting = game:GetService("Lighting")
-    Lighting.FogEnd = 100000
-    for _, obj in pairs(Lighting:GetDescendants()) do
-        if obj:IsA("Atmosphere") then
-            obj:Destroy()
-        end
-    end
-end
-
-local function loopfullbright()
-    local Lighting = game:GetService("Lighting")
-    if brightLoop then brightLoop:Disconnect() end
-    local function updateLighting()
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 14
-        Lighting.FogEnd = 100000
-        Lighting.GlobalShadows = false
-        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-    end
-    brightLoop = RunService.RenderStepped:Connect(updateLighting)
-    updateLighting()
-end
-
-local function unloopfullbright()
-    if brightLoop then brightLoop:Disconnect() brightLoop = nil end
-end
-
--- UI Toggle Fullbright
-local fullbrightToggle = Instance.new("TextButton")
-fullbrightToggle.Name = "FullbrightToggle"
-fullbrightToggle.Size = UDim2.new(0, 140, 0, 30)
-fullbrightToggle.Position = UDim2.new(0.5, -70, 0, 90)
-fullbrightToggle.Text = "Fullbright: OFF"
-fullbrightToggle.Font = Enum.Font.GothamSemibold
-fullbrightToggle.TextSize = 16
-fullbrightToggle.TextColor3 = Color3.new(1,1,1)
-fullbrightToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-Instance.new("UICorner", fullbrightToggle).CornerRadius = UDim.new(0, 8)
-fullbrightToggle.Parent = frame
-
-local fullbrightActive = false
-fullbrightToggle.MouseButton1Click:Connect(function()
-    fullbrightActive = not fullbrightActive
-    if fullbrightActive then
-        nofog()
-        loopfullbright()
-        fullbrightToggle.Text = "Fullbright: ON"
-        fullbrightToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    else
-        unloopfullbright()
-        fullbrightToggle.Text = "Fullbright: OFF"
-        fullbrightToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    end
-end)
-
----------------------------------------------
--- C-FLY
----------------------------------------------
 local CFspeed = 100
-local CFloop = nil
-local CFhead = nil
+local Head
 
-local function startCFly()
-    if CFloop then return end
-    local char = player.Character or player.CharacterAdded:Wait()
-    CFhead = char:WaitForChild("Head")
-    CFhead.Anchored = true
-    
-    CFloop = RunService.Heartbeat:Connect(function(deltaTime)
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if not hum then return end
-        local moveDirection = hum.MoveDirection * (CFspeed * deltaTime)
-        local headCFrame = CFhead.CFrame
-        local camera = workspace.CurrentCamera
-        local cameraCFrame = camera.CFrame
-        local cameraOffset = headCFrame:ToObjectSpace(cameraCFrame).Position
-        cameraCFrame = cameraCFrame * CFrame.new(-cameraOffset.X, -cameraOffset.Y, -cameraOffset.Z + 1)
-        local cameraPosition = cameraCFrame.Position
-        local headPosition = headCFrame.Position
-
-        local objectSpaceVelocity = CFrame.new(cameraPosition, Vector3.new(headPosition.X, cameraPosition.Y, headPosition.Z)):VectorToObjectSpace(moveDirection)
-        CFhead.CFrame = CFrame.new(headPosition) * (cameraCFrame - cameraPosition) * CFrame.new(objectSpaceVelocity)
-    end)
+-- Highlight
+local function clearHighlights()
+ for _,h in pairs(highlightObjects) do if h then h:Destroy() end end
+ highlightObjects = {}
 end
-
-local function stopCFly()
-    if CFloop then
-        CFloop:Disconnect()
-        CFloop = nil
-    end
-    if CFhead then
-        CFhead.Anchored = false
-        CFhead = nil
-    end
-    local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-    if hum then hum.PlatformStand = false end
+local function updateHighlights()
+ if not highlightActive then clearHighlights() return end
+ for _,plr in pairs(Players:GetPlayers()) do
+  if plr ~= player and plr.Character and not highlightObjects[plr] then
+   local h = Instance.new("Highlight")
+   h.FillColor = Color3.fromRGB(255,50,50)
+   h.OutlineColor = Color3.fromRGB(100,0,0)
+   h.FillTransparency = 0.3
+   h.Parent = plr.Character
+   highlightObjects[plr] = h
+  end
+ end
 end
-
--- UI Toggle C-Fly
-local cflyToggle = Instance.new("TextButton")
-cflyToggle.Name = "CFlyToggle"
-cflyToggle.Size = UDim2.new(0, 140, 0, 30)
-cflyToggle.Position = UDim2.new(0.5, -70, 0, 130)
-cflyToggle.Text = "C-Fly: OFF"
-cflyToggle.Font = Enum.Font.GothamSemibold
-cflyToggle.TextSize = 16
-cflyToggle.TextColor3 = Color3.new(1,1,1)
-cflyToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-Instance.new("UICorner", cflyToggle).CornerRadius = UDim.new(0, 8)
-cflyToggle.Parent = frame
-
-local cflyActive = false
-cflyToggle.MouseButton1Click:Connect(function()
-    cflyActive = not cflyActive
-    if cflyActive then
-        startCFly()
-        cflyToggle.Text = "C-Fly: ON"
-        cflyToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    else
-        stopCFly()
-        cflyToggle.Text = "C-Fly: OFF"
-        cflyToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    end
+RunService.RenderStepped:Connect(function()
+ if highlightActive then updateHighlights() end
 end)
 
----------------------------------------------
--- TP TOOL (tombol, bukan toggle)
----------------------------------------------
-local tpToolButton = Instance.new("TextButton")
-tpToolButton.Name = "TpToolButton"
-tpToolButton.Size = UDim2.new(0, 140, 0, 30)
-tpToolButton.Position = UDim2.new(0.5, -70, 0, 170)
-tpToolButton.Text = "Give TpTool"
-tpToolButton.Font = Enum.Font.GothamSemibold
-tpToolButton.TextSize = 16
-tpToolButton.TextColor3 = Color3.new(1,1,1)
-tpToolButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-Instance.new("UICorner", tpToolButton).CornerRadius = UDim.new(0, 8)
-tpToolButton.Parent = frame
+-- Fullbright
+local function nofog()
+ local L = game:GetService("Lighting")
+ L.FogEnd = 1e5
+ for _,o in pairs(L:GetDescendants()) do
+  if o:IsA("Atmosphere") then o:Destroy() end
+ end
+end
+local function loopfullbright()
+ local L = game:GetService("Lighting")
+ if brightLoop then brightLoop:Disconnect() end
+ local function upd()
+  L.Brightness = 2
+  L.ClockTime = 14
+  L.FogEnd = 1e5
+  L.GlobalShadows = false
+  L.OutdoorAmbient = Color3.fromRGB(128,128,128)
+ end
+ brightLoop = RunService.RenderStepped:Connect(upd)
+ upd()
+end
+local function unloopfullbright() if brightLoop then brightLoop:Disconnect() brightLoop=nil end end
 
-tpToolButton.MouseButton1Click:Connect(function()
-    local TpTool = Instance.new("Tool")
-    TpTool.Name = "Teleport Tool"
-    TpTool.RequiresHandle = false
-    TpTool.Parent = player.Backpack
-    TpTool.Activated:Connect(function()
-        local Char = player.Character or workspace:FindFirstChild(player.Name)
-        local HRP = Char and Char:FindFirstChild("HumanoidRootPart")
-        if not Char or not HRP then
-            return warn("Failed to find HumanoidRootPart")
-        end
-        HRP.CFrame = CFrame.new(mouse.Hit.X, mouse.Hit.Y + 3, mouse.Hit.Z, select(4, HRP.CFrame:components()))
-    end)
-end)
+------------------------------------------------
+-- MOBILE FLY (versi baru, hybrid-friendly)
+------------------------------------------------
+local CMD_Settings = {
+ FlyCMD = {
+  FlyOn = false,
+  FlySpeed = 2
+ }
+}
 
----------------------------------------------
--- NOCLIP TOGGLE
----------------------------------------------
-local noclipActive = false
-local Noclipping = nil
+local mfly1, mfly2
 
-local function NoclipLoop()
-    if not noclipActive or not player.Character then return end
-    for _, child in pairs(player.Character:GetDescendants()) do
-        if child:IsA("BasePart") and child.CanCollide == true then
-            child.CanCollide = false
-        end
-    end
+function UnMobileFly()
+ CMD_Settings.FlyCMD.FlyOn = false
+ local char = player.Character
+ if not char then return end
+ local root = char:FindFirstChild("HumanoidRootPart")
+ if not root then return end
+
+ if root:FindFirstChild("BodyVelocity") then
+  root.BodyVelocity:Destroy()
+ end
+ if root:FindFirstChild("BodyGyro") then
+  root.BodyGyro:Destroy()
+ end
+
+ local humanoid = char:FindFirstChildOfClass("Humanoid")
+ if humanoid then
+  humanoid.PlatformStand = false
+ end
+
+ if mfly1 then mfly1:Disconnect() mfly1 = nil end
+ if mfly2 then mfly2:Disconnect() mfly2 = nil end
 end
 
+function MobileFly()
+ UnMobileFly()
+ CMD_Settings.FlyCMD.FlyOn = true
+
+ local root = player.Character:WaitForChild("HumanoidRootPart")
+ local camera = workspace.CurrentCamera
+ local v3none = Vector3.new()
+ local v3zero = Vector3.new(0, 0, 0)
+ local v3inf = Vector3.new(9e9, 9e9, 9e9)
+
+ local controlModule = require(player.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+ local bv = Instance.new("BodyVelocity")
+ bv.Name = "BodyVelocity"
+ bv.Parent = root
+ bv.MaxForce = v3zero
+ bv.Velocity = v3zero
+
+ local bg = Instance.new("BodyGyro")
+ bg.Name = "BodyGyro"
+ bg.Parent = root
+ bg.MaxTorque = v3inf
+ bg.P = 1000
+ bg.D = 50
+
+ mfly1 = player.CharacterAdded:Connect(function()
+  local newRoot = player.Character:WaitForChild("HumanoidRootPart")
+  local newBv = Instance.new("BodyVelocity")
+  newBv.Name = "BodyVelocity"
+  newBv.Parent = newRoot
+  newBv.MaxForce = v3zero
+  newBv.Velocity = v3zero
+
+  local newBg = Instance.new("BodyGyro")
+  newBg.Name = "BodyGyro"
+  newBg.Parent = newRoot
+  newBg.MaxTorque = v3inf
+  newBg.P = 1000
+  newBg.D = 50
+ end)
+
+ mfly2 = RunService.RenderStepped:Connect(function()
+  root = player.Character:WaitForChild("HumanoidRootPart")
+  camera = workspace.CurrentCamera
+  if player.Character:FindFirstChildWhichIsA("Humanoid") and root:FindFirstChild("BodyVelocity") and root:FindFirstChild("BodyGyro") then
+   local humanoid = player.Character:FindFirstChildWhichIsA("Humanoid")
+   local VelocityHandler = root:FindFirstChild("BodyVelocity")
+   local GyroHandler = root:FindFirstChild("BodyGyro")
+
+   VelocityHandler.MaxForce = v3inf
+   GyroHandler.MaxTorque = v3inf
+   humanoid.PlatformStand = true
+   GyroHandler.CFrame = camera.CFrame
+   VelocityHandler.Velocity = v3none
+
+   local direction = controlModule:GetMoveVector()
+   if direction.Magnitude > 0 then
+    VelocityHandler.Velocity =
+     (camera.CFrame.LookVector * -direction.Z + camera.CFrame.RightVector * direction.X)
+     * (CMD_Settings.FlyCMD.FlySpeed * 50)
+   end
+  end
+ end)
+end
+
+------------------------------------------------
+-- NOCLIP
+------------------------------------------------
 local function startNoclip()
-    noclipActive = true
-    Noclipping = RunService.Stepped:Connect(NoclipLoop)
+ noclipActive = true
+ noclipConn = RunService.Stepped:Connect(function()
+  if player.Character then
+   for _,p in pairs(player.Character:GetDescendants()) do
+    if p:IsA("BasePart") then p.CanCollide=false end
+   end
+  end
+ end)
 end
-
 local function stopNoclip()
-    noclipActive = false
-    if Noclipping then
-        Noclipping:Disconnect()
-        Noclipping = nil
-    end
-    -- restore collisions
-    if player.Character then
-        for _, child in pairs(player.Character:GetDescendants()) do
-            if child:IsA("BasePart") then
-                child.CanCollide = true
-            end
-        end
-    end
+ noclipActive = false
+ if noclipConn then noclipConn:Disconnect() noclipConn=nil end
 end
 
--- UI Toggle Noclip
-local noclipToggle = Instance.new("TextButton")
-noclipToggle.Name = "NoclipToggle"
-noclipToggle.Size = UDim2.new(0, 140, 0, 30)
-noclipToggle.Position = UDim2.new(0.5, -70, 0, 210)
-noclipToggle.Text = "Noclip: OFF"
-noclipToggle.Font = Enum.Font.GothamSemibold
-noclipToggle.TextSize = 16
-noclipToggle.TextColor3 = Color3.new(1,1,1)
-noclipToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-Instance.new("UICorner", noclipToggle).CornerRadius = UDim.new(0, 8)
-noclipToggle.Parent = frame
+------------------------------------------------
+-- WAYPOINT LIST SYSTEM
+------------------------------------------------
+local waypoints = {}
+local wpFrame = Instance.new("ScrollingFrame")
+wpFrame.Size = UDim2.new(1, -20, 0, 90)
+wpFrame.Position = UDim2.new(0, 10, 1, -150)
+wpFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+wpFrame.BorderSizePixel = 0
+wpFrame.ScrollBarThickness = 6
+wpFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+wpFrame.Parent = frame
+Instance.new("UICorner", wpFrame).CornerRadius = UDim.new(0, 8)
 
-noclipToggle.MouseButton1Click:Connect(function()
-    noclipActive = not noclipActive
-    if noclipActive then
-        startNoclip()
-        noclipToggle.Text = "Noclip: ON"
-        noclipToggle.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    else
-        stopNoclip()
-        noclipToggle.Text = "Noclip: OFF"
-        noclipToggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    end
-end)
+local listLayout = Instance.new("UIListLayout", wpFrame)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Padding = UDim.new(0, 5)
 
--------------------------------------------
--- SET-WAYPOINT & WAYPOINT
--------------------------------------------
-local WayPoints = {}          -- wp lokal game ini
-local AllWayPoints = {}       -- wp global (opsional, simpan di file jika mau)
-local PlaceId = game.PlaceId
-
--- helper: dapatkan HumanoidRootPart
-local function getRoot(char)
-    return char and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso"))
+local function refreshWPList()
+ for _,child in pairs(wpFrame:GetChildren()) do
+  if child:IsA("TextButton") then child:Destroy() end
+ end
+ for i,wp in ipairs(waypoints) do
+  local btn = Instance.new("TextButton")
+  btn.Size = UDim2.new(1, -5, 0, 26)
+  btn.Text = wp.name
+  btn.Font = Enum.Font.GothamSemibold
+  btn.TextSize = 14
+  btn.TextColor3 = Color3.new(1,1,1)
+  btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+  Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+  btn.Parent = wpFrame
+  btn.MouseButton1Click:Connect(function()
+   local char = player.Character
+   local root = char and char:FindFirstChild("HumanoidRootPart")
+   if root then root.CFrame = CFrame.new(wp.pos + Vector3.new(0,3,0)) end
+  end)
+ end
+ wpFrame.CanvasSize = UDim2.new(0, 0, 0, #waypoints * 32)
 end
 
--- UI tombol SET waypoint
-local setWpBtn = Instance.new("TextButton")
-setWpBtn.Name = "SetWaypoint"
-setWpBtn.Size = UDim2.new(0, 65, 0, 30)
-setWpBtn.Position = UDim2.new(0.5, -70, 0, 250)
-setWpBtn.Text = "Set WP"
-setWpBtn.Font = Enum.Font.GothamSemibold
-setWpBtn.TextSize = 14
-setWpBtn.TextColor3 = Color3.new(1, 1, 1)
-setWpBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-Instance.new("UICorner", setWpBtn).CornerRadius = UDim.new(0, 6)
-setWpBtn.Parent = frame
-
--- Input nama waypoint
-local wpNameBox = Instance.new("TextBox")
-wpNameBox.Name = "WPNameBox"
-wpNameBox.Size = UDim2.new(0, 65, 0, 30)
-wpNameBox.Position = UDim2.new(0.5, 5, 0, 250)
-wpNameBox.PlaceholderText = "nama"
-wpNameBox.Font = Enum.Font.Code
-wpNameBox.TextSize = 14
-wpNameBox.TextColor3 = Color3.new(1, 1, 1)
-wpNameBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-Instance.new("UICorner", wpNameBox).CornerRadius = UDim.new(0, 6)
-wpNameBox.Parent = frame
-
--- daftar waypoint (scrolling frame)
-local wpList = Instance.new("ScrollingFrame")
-wpList.Name = "WPList"
-wpList.Size = UDim2.new(0, 140, 0, 60)
-wpList.Position = UDim2.new(0.5, -70, 0, 290)
-wpList.BackgroundTransparency = 1
-wpList.ScrollBarThickness = 4
-wpList.CanvasSize = UDim2.new(0, 0, 0, 0)
-wpList.Parent = frame
-
-local wpUI = Instance.new("UIListLayout")
-wpUI.SortOrder = Enum.SortOrder.LayoutOrder
-wpUI.Padding = UDim.new(0, 4)
-wpUI.Parent = wpList
-
--- fungsi refresh tampilan waypoint
-local function refreshWP()
-    -- clear children
-    for _, child in pairs(wpList:GetChildren()) do
-        if child:IsA("TextButton") then child:Destroy() end
-    end
-    -- buat tombol teleport per waypoint
-    for i, wp in ipairs(WayPoints) do
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, 0, 0, 24)
-        btn.Text = wp.NAME
-        btn.Font = Enum.Font.SourceSans
-        btn.TextSize = 14
-        btn.TextColor3 = Color3.new(1, 1, 1)
-        btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
-        btn.Parent = wpList
-        btn.MouseButton1Click:Connect(function()
-            local root = getRoot(player.Character)
-            if root then
-                root.CFrame = CFrame.new(unpack(wp.COORD))
-            end
-        end)
-    end
-    wpList.CanvasSize = UDim2.new(0, 0, 0, #WayPoints * 28)
+local function saveWaypoint()
+ local char = player.Character
+ local root = char and char:FindFirstChild("HumanoidRootPart")
+ if root then
+  local name = "WP" .. tostring(#waypoints + 1)
+  table.insert(waypoints, {name = name, pos = root.Position})
+  refreshWPList()
+ end
 end
 
--- tombol Set Waypoint
-setWpBtn.MouseButton1Click:Connect(function()
-    local name = wpNameBox.Text:gsub("%s+", "")
-    if name == "" then return end
-    local root = getRoot(player.Character)
-    if not root then return end
-    WayPoints[#WayPoints + 1] = {
-        NAME  = name,
-        COORD = {math.floor(root.Position.X), math.floor(root.Position.Y), math.floor(root.Position.Z)},
-        GAME  = PlaceId
-    }
-    refreshWP()
-    wpNameBox.Text = ""
+------------------------------------------------
+-- TOMBOL UTAMA
+------------------------------------------------
+local btnHighlight = newButton("Highlight","Highlight: OFF")
+btnHighlight.MouseButton1Click:Connect(function()
+ highlightActive = not highlightActive
+ btnHighlight.Text = highlightActive and "Highlight: ON" or "Highlight: OFF"
+ btnHighlight.BackgroundColor3 = highlightActive and Color3.fromRGB(150,0,0) or Color3.fromRGB(80,80,80)
+ updateHighlights()
 end)
 
--- pindahkan destroy button ke bawah
-local destroyButton = Instance.new("TextButton")
-destroyButton.Name = "DestroyButton"
-destroyButton.Size = UDim2.new(0, 140, 0, 30)
-destroyButton.Position = UDim2.new(0.5, -70, 0, 360)
-destroyButton.Text = "Destroy GUI"
-destroyButton.Font = Enum.Font.GothamSemibold
-destroyButton.TextSize = 16
-destroyButton.TextColor3 = Color3.new(1,1,1)
-destroyButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-Instance.new("UICorner", destroyButton).CornerRadius = UDim.new(0, 8)
-destroyButton.Parent = frame
-
-destroyButton.MouseButton1Click:Connect(function()
-    gui:Destroy()
+local btnBright = newButton("Fullbright","Fullbright: OFF")
+btnBright.MouseButton1Click:Connect(function()
+ fullbrightActive = not fullbrightActive
+ if fullbrightActive then nofog(); loopfullbright() else unloopfullbright() end
+ btnBright.Text = fullbrightActive and "Fullbright: ON" or "Fullbright: OFF"
+ btnBright.BackgroundColor3 = fullbrightActive and Color3.fromRGB(150,0,0) or Color3.fromRGB(80,80,80)
 end)
+
+local btnFly = newButton("MobileFly","Fly: OFF")
+btnFly.MouseButton1Click:Connect(function()
+ flyActive = not flyActive
+ if flyActive then
+  MobileFly()
+  btnFly.Text = "Fly: ON"
+  btnFly.BackgroundColor3 = Color3.fromRGB(150,0,0)
+ else
+  UnMobileFly()
+  btnFly.Text = "Fly: OFF"
+  btnFly.BackgroundColor3 = Color3.fromRGB(80,80,80)
+ end
+end)
+
+local btnNoclip = newButton("Noclip","Noclip: OFF")
+btnNoclip.MouseButton1Click:Connect(function()
+ noclipActive = not noclipActive
+ if noclipActive then startNoclip() else stopNoclip() end
+ btnNoclip.Text = noclipActive and "Noclip: ON" or "Noclip: OFF"
+ btnNoclip.BackgroundColor3 = noclipActive and Color3.fromRGB(150,0,0) or Color3.fromRGB(80,80,80)
+end)
+
+local btnSaveWP = newButton("SaveWP","Save Waypoint")
+btnSaveWP.MouseButton1Click:Connect(saveWaypoint)
+
+local btnDestroy = newButton("Destroy","Destroy GUI")
+btnDestroy.BackgroundColor3 = Color3.fromRGB(150,0,0)
+btnDestroy.MouseButton1Click:Connect(function() gui:Destroy() end)
