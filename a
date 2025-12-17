@@ -17,8 +17,9 @@ gui.Parent = player:WaitForChild("PlayerGui")
 
 -- Main frame (initially hidden)
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 320, 0, 360)
-frame.Position = UDim2.new(0.7, 0, 0.25, 0)
+frame.Size = UDim2.new(0, 320, 0, 400)
+frame.Position = UDim2.new(0.5, -160, 0.5, -180)
+frame.AnchorPoint = Vector2.new(0, 0)
 frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 frame.BorderSizePixel = 0
 frame.Active = true
@@ -35,60 +36,89 @@ stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 -- Title
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 40)
+title.Size = UDim2.new(1, 0, 0, 50)
 title.BackgroundTransparency = 1
-title.Text = "Menu Utama"
+title.Text = "GANTENK"
 title.Font = Enum.Font.GothamBold
 title.TextColor3 = Color3.fromRGB(200, 200, 200)
 title.TextSize = 20
 title.Parent = frame
 
--- Toggle button (positioned left-center with 25px from left)
+-- GANTI ukuran & posisi toggle button agar 30 dan bisa dipindah
 local toggleButton = Instance.new("TextButton")
 toggleButton.Name = "ToggleButton"
-toggleButton.Size = UDim2.new(0, 50, 0, 50)
-toggleButton.Position = UDim2.new(0, 25, 0.5, -25)
+toggleButton.Size = UDim2.new(0, 30, 0, 30)
+toggleButton.Position = UDim2.new(0, 25, 0.5, -15)   -- tengah vertikal
 toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 toggleButton.Text = "⚙"
 toggleButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-toggleButton.TextSize = 24
+toggleButton.TextSize = 14
 toggleButton.ZIndex = 100
 toggleButton.BorderSizePixel = 0
 toggleButton.AutoButtonColor = false
 toggleButton.Parent = gui
 
-Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 6)
 
 local toggleStroke = Instance.new("UIStroke", toggleButton)
-toggleStroke.Thickness = 2
+toggleStroke.Thickness = 1
 toggleStroke.Color = Color3.fromRGB(150, 150, 150)
-toggleStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+-- drag data
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+local function updatePos(input)
+	local delta = input.Position - dragStart
+	toggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+	                                  startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+toggleButton.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = toggleButton.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then dragging = false end
+		end)
+	end
+end)
+
+toggleButton.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		updatePos(input)
+	end
+end)
 
 -- Toggle function
 local function toggleGUI()
-    frame.Visible = not frame.Visible
-    
-    if frame.Visible then
-        toggleButton.Text = "✕"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-        toggleButton.TextColor3 = Color3.new(1, 1, 1)
-        toggleStroke.Color = Color3.fromRGB(255, 100, 100)
-    else
-        toggleButton.Text = "⚙"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        toggleButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        toggleStroke.Color = Color3.fromRGB(150, 150, 150)
-    end
+	frame.Visible = not frame.Visible
+	if frame.Visible then
+		toggleButton.Text = "X"
+		toggleButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+		toggleButton.TextColor3 = Color3.new(1, 1, 1)
+		toggleStroke.Color = Color3.fromRGB(255, 100, 100)
+	else
+		toggleButton.Text = "⚙"
+		toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+		toggleButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+		toggleStroke.Color = Color3.fromRGB(150, 150, 150)
+	end
 end
 
--- Connect toggle button
 toggleButton.MouseButton1Click:Connect(toggleGUI)
 
--- Keybind toggle (RightControl)
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.RightControl then
-        toggleGUI()
-    end
+UserInputService.InputBegan:Connect(function(input, gP)
+	if not gP and input.KeyCode == Enum.KeyCode.RightControl then toggleGUI() end
 end)
 
 ---------------------------------------------
@@ -369,13 +399,106 @@ noclipToggle.MouseButton1Click:Connect(function()
     end
 end)
 
----------------------------------------------
--- DESTROY GUI
----------------------------------------------
+-------------------------------------------
+-- SET-WAYPOINT & WAYPOINT
+-------------------------------------------
+local WayPoints = {}          -- wp lokal game ini
+local AllWayPoints = {}       -- wp global (opsional, simpan di file jika mau)
+local PlaceId = game.PlaceId
+
+-- helper: dapatkan HumanoidRootPart
+local function getRoot(char)
+    return char and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso"))
+end
+
+-- UI tombol SET waypoint
+local setWpBtn = Instance.new("TextButton")
+setWpBtn.Name = "SetWaypoint"
+setWpBtn.Size = UDim2.new(0, 65, 0, 30)
+setWpBtn.Position = UDim2.new(0.5, -70, 0, 250)
+setWpBtn.Text = "Set WP"
+setWpBtn.Font = Enum.Font.GothamSemibold
+setWpBtn.TextSize = 14
+setWpBtn.TextColor3 = Color3.new(1, 1, 1)
+setWpBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Instance.new("UICorner", setWpBtn).CornerRadius = UDim.new(0, 6)
+setWpBtn.Parent = frame
+
+-- Input nama waypoint
+local wpNameBox = Instance.new("TextBox")
+wpNameBox.Name = "WPNameBox"
+wpNameBox.Size = UDim2.new(0, 65, 0, 30)
+wpNameBox.Position = UDim2.new(0.5, 5, 0, 250)
+wpNameBox.PlaceholderText = "nama"
+wpNameBox.Font = Enum.Font.Code
+wpNameBox.TextSize = 14
+wpNameBox.TextColor3 = Color3.new(1, 1, 1)
+wpNameBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+Instance.new("UICorner", wpNameBox).CornerRadius = UDim.new(0, 6)
+wpNameBox.Parent = frame
+
+-- daftar waypoint (scrolling frame)
+local wpList = Instance.new("ScrollingFrame")
+wpList.Name = "WPList"
+wpList.Size = UDim2.new(0, 140, 0, 60)
+wpList.Position = UDim2.new(0.5, -70, 0, 290)
+wpList.BackgroundTransparency = 1
+wpList.ScrollBarThickness = 4
+wpList.CanvasSize = UDim2.new(0, 0, 0, 0)
+wpList.Parent = frame
+
+local wpUI = Instance.new("UIListLayout")
+wpUI.SortOrder = Enum.SortOrder.LayoutOrder
+wpUI.Padding = UDim.new(0, 4)
+wpUI.Parent = wpList
+
+-- fungsi refresh tampilan waypoint
+local function refreshWP()
+    -- clear children
+    for _, child in pairs(wpList:GetChildren()) do
+        if child:IsA("TextButton") then child:Destroy() end
+    end
+    -- buat tombol teleport per waypoint
+    for i, wp in ipairs(WayPoints) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, 0, 0, 24)
+        btn.Text = wp.NAME
+        btn.Font = Enum.Font.SourceSans
+        btn.TextSize = 14
+        btn.TextColor3 = Color3.new(1, 1, 1)
+        btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
+        btn.Parent = wpList
+        btn.MouseButton1Click:Connect(function()
+            local root = getRoot(player.Character)
+            if root then
+                root.CFrame = CFrame.new(unpack(wp.COORD))
+            end
+        end)
+    end
+    wpList.CanvasSize = UDim2.new(0, 0, 0, #WayPoints * 28)
+end
+
+-- tombol Set Waypoint
+setWpBtn.MouseButton1Click:Connect(function()
+    local name = wpNameBox.Text:gsub("%s+", "")
+    if name == "" then return end
+    local root = getRoot(player.Character)
+    if not root then return end
+    WayPoints[#WayPoints + 1] = {
+        NAME  = name,
+        COORD = {math.floor(root.Position.X), math.floor(root.Position.Y), math.floor(root.Position.Z)},
+        GAME  = PlaceId
+    }
+    refreshWP()
+    wpNameBox.Text = ""
+end)
+
+-- pindahkan destroy button ke bawah
 local destroyButton = Instance.new("TextButton")
 destroyButton.Name = "DestroyButton"
 destroyButton.Size = UDim2.new(0, 140, 0, 30)
-destroyButton.Position = UDim2.new(0.5, -70, 0, 250)
+destroyButton.Position = UDim2.new(0.5, -70, 0, 360)
 destroyButton.Text = "Destroy GUI"
 destroyButton.Font = Enum.Font.GothamSemibold
 destroyButton.TextSize = 16
