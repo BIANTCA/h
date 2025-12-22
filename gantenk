@@ -1,1 +1,795 @@
-return(function(...)local L={"\108\087\081\117\065\118\074\114\097\055\073\066","\112\055\117\049\119\049\090\047\119\054\113\117\054\084\113\115\087\099\061\061","\079\067\055\083","\116\088\056\047\081\043\054\061";"\111\053\102\079\074\113\073\057";"\052\053\078\098\107\068\052\108\043\085\074\074\050\099\061\061";"\078\049\119\109\054\097\102\117\112\073\119\053\081\115\061\061";"\089\052\114\087";"\073\057\119\086\113\109\102\100\116\057\087\099\106\085\101\122";"\054\116\088\077";"\111\057\099\083\067\052\112\100";"\098\051\074\081\077\050\043\113\097\108\083\061","\121\080\053\054\088\113\047\049\117\070\078\100","\103\065\050\105\069\051\082\101\104\072\066\061";"\078\049\102\084\116\097\065\067\098\119\065\105\106\097\119\098\067\099\061\061","\102\065\069\099\110\081\116\068\054\083\098\109\070\083\068\049";"\118\099\122\122\116\085\098\087\089\054\074\066\057\121\084\089\112\104\109\076\066\083\061\061";"\090\107\068\109","\078\089\074\110\067\074\048\090\120\055\054\061","\078\122\070\052\120\110\071\122\103\115\061\061","\050\085\087\069\113\113\050\115\075\106\112\111\122\099\061\061","\043\051\070\072\113\073\118\061","\122\071\112\047\113\108\101\119\043\078\116\079\109\043\078\081\105\073\086\107\119\067\110\116\114\069\116\107";"\087\074\076\088\098\088\051\074\076\121\072\061";"\087\089\050\067\070\122\110\074\112\106\072\061","\099\049\047\087\088\098\047\110\116\103\117\104","\116\122\043\101\088\053\049\050\088\068\109\104\108\066\113\050\117\122\066\061","\073\121\120\049\106\050\061\061","\084\072\116\087\098\088\043\057";"\113\089\079\073\071\071\120\079";"\097\115\067\099\082\115\061\061";"\049\070\075\099\104\088\077\100\114\112\075\061";"\119\099\090\073\106\102\076\067\080\055\082\111\119\043\080\068\065\049\056\112\069\099\061\061","\100\056\075\106\087\079\116\109\110\050\061\061","\080\057\090\065\073\084\090\072\054\065\054\115\081\082\110\047","\073\073\067\076\054\085\067\079\085\108\078\104\116\043\087\082\054\115\061\061";"\087\050\077\104\048\121\102\111\081\115\061\061";"\084\057\068\097\115\068\070\109\119\047\110\069\066\115\061\061","\072\053\078\101\115\082\053\073\114\072\048\122\082\098\108\098\121\081\115\061";"\112\111\083\087\086\082\076\119\072\117\115\120\075\098\119\050\113\050\061\061";"\112\079\113\055\103\065\117\079\116\073\067\113\116\057\065\109\113\099\061\061";"\067\047\080\122\116\101\083\121","\110\073\088\051\101\083\061\061";"\113\074\069\083\067\102\054\061";"\078\049\119\109\054\049\119\053\087\057\065\079\113\099\061\061";"\066\067\065\053\119\109\075\116\080\051\083\057\089\047\103\085","\116\082\087\101\119\085\067\106\099\119\101\085\078\073\051\113";"\105\090\115\051\066\077\082\061","\056\118\077\101","\097\108\099\066","\116\110\056\113\089\050\061\061";"\055\104\111\066";"\056\106\085\074","\052\097\067\073\078\082\051\104\073\065\119\108\112\119\113\071\087\050\061\061","\052\097\104\080\103\085\067\066\067\049\083\109\067\043\119\055","\057\115\076\053\077\050\061\061";"\078\049\119\109\078\097\119\107\080\049\119\089\113\097\110\089\087\108\116\061","\121\050\086\118\105\043\102\089\099\084\072\061","\053\104\114\100\089\048\051\054\075\085\115\061";"\056\110\081\073\054\099\061\061","\048\090\108\075\088\075\100\073","\053\053\056\072\114\099\061\061","\078\065\048\056\074\115\061\061";"\099\049\070\072\103\048\066\107","\103\088\084\061","\099\049\075\048\112\119\117\106\080\055\119\067\078\107\117\098","\081\057\119\047\103\048\113\065","\084\089\116\087\101\083\061\061","\053\099\061\061","\108\049\078\114\047\088\077\122\108\105\075\065";"\101\070\085\072";"\122\122\079\102\056\103\103\048\074\099\061\061","\069\052\057\075","\074\068\072\098";"\119\090\049\057\100\090\108\051\118\111\050\067\043\075\070\090\043\105\105\061","\083\108\099\078\107\072\106\081\074\053\103\122\082\099\061\061";"\048\068\077\088\100\053\054\048\112\068\118\112";"\050\088\083\048\100\054\103\106\077\050\117\088\056\074\088\078";"\087\108\087\121","\110\082\101\099\072\102\085\085\098\112\116\061","\057\098\119\068\085\105\103\117\089\076\090\119";"\056\079\107\120\082\050\061\061";"\051\050\079\102\081\113\051\070\073\118\109\061";"\105\055\119\043\109\098\105\056\071\099\061\061";"\065\073\078\119\101\122\066\120\073\076\116\043\067\065\084\055\068\043\105\061","\112\083\119\088\073\087\047\082";"\087\049\070\053\052\048\067\115\080\073\067\065","\111\078\087\107";"\078\087\047\067\115\066\072\068\105\051\099\098\105\087\088\086\073\043\116\061","\084\081\102\065","\107\074\075\108\080\115\061\061";"\099\073\109\082\109\080\099\100\057\056\114\106\079\117\070\087\069\043\070\068\098\113\083\061","\089\068\089\078\100\100\081\118\043\088\080\061","\116\109\102\073\052\108\110\066\073\057\113\105\087\054\102\109";"\113\057\102\090\099\055\078\089";"\098\073\110\110\103\051\081\115\085\073\080\049\078\065\110\107\103\057\054\061";"\115\082\110\069";"\087\073\090\115\080\073\067\076","\078\050\111\077\080
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+local HumanModCons = {
+	wsLoop = nil,
+	wsCA = nil
+}
+
+local function newButton(name, text)
+	local b = Instance.new("TextButton")
+	b.Name = name
+	b.Text = text
+	b.Font = Enum.Font.GothamSemibold
+	b.TextSize = 14
+	b.TextColor3 = Color3.new(1,1,1)
+	b.BackgroundColor3 = Color3.fromRGB(80,80,80)
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+	b.Parent = btnHolder
+	return b
+end
+
+-- Hapus GUI lama
+if player.PlayerGui:FindFirstChild("CoolController") then
+ player.PlayerGui.CoolController:Destroy()
+end
+
+-- GUI utama
+local gui = Instance.new("ScreenGui")
+gui.Name = "CoolController"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 360, 0, 320)
+frame.Position = UDim2.new(0.5, -180, 0.5, -160)
+frame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+frame.BorderSizePixel = 0
+frame.Visible = false
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+local stroke = Instance.new("UIStroke", frame)
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(100, 100, 100)
+
+-- Judul
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 35)
+title.Text = "GANTENK"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(230, 230, 230)
+title.Parent = frame
+
+-- Tombol Toggle GUI
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 32, 0, 32)
+toggleButton.Position = UDim2.new(0, 20, 0.5, -16)
+toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+toggleButton.Text = "Open"
+toggleButton.TextSize = 14
+toggleButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+toggleButton.Parent = gui
+Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 6)
+
+-- Toggle drag
+local dragging, dragStart, startPos, dragInput = false, nil, nil, nil
+local function updatePos(input)
+ local delta = input.Position - dragStart
+ toggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+  startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+toggleButton.InputBegan:Connect(function(input)
+ if input.UserInputType == Enum.UserInputType.MouseButton1 then
+  dragging = true
+  dragStart = input.Position
+  startPos = toggleButton.Position
+  input.Changed:Connect(function()
+   if input.UserInputState == Enum.UserInputState.End then dragging = false end
+  end)
+ end
+end)
+toggleButton.InputChanged:Connect(function(input)
+ if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
+end)
+UserInputService.InputChanged:Connect(function(input)
+ if input == dragInput and dragging then updatePos(input) end
+end)
+
+local function toggleGUI()
+ frame.Visible = not frame.Visible
+ toggleButton.Text = frame.Visible and "Close" or "Open"
+ toggleButton.BackgroundColor3 = frame.Visible and Color3.fromRGB(120, 0, 0) or Color3.fromRGB(70, 70, 70)
+end
+toggleButton.MouseButton1Click:Connect(toggleGUI)
+UserInputService.InputBegan:Connect(function(i,gp)
+ if not gp and i.KeyCode == Enum.KeyCode.RightControl then toggleGUI() end
+end)
+
+------------------------------------------------
+-- GRID (2 kolom)
+------------------------------------------------
+local btnHolder = Instance.new("Frame")
+btnHolder.Size = UDim2.new(1, -20, 0, 150)
+btnHolder.Position = UDim2.new(0, 10, 0, 40)
+btnHolder.BackgroundTransparency = 1
+btnHolder.Parent = frame
+
+local grid = Instance.new("UIGridLayout", btnHolder)
+grid.CellSize = UDim2.new(0, 150, 0, 32)
+grid.CellPadding = UDim2.new(0, 10, 0, 10)
+grid.FillDirectionMaxCells = 2
+grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
+grid.VerticalAlignment = Enum.VerticalAlignment.Top
+
+local function newButton(name, text)
+ local b = Instance.new("TextButton")
+ b.Name = name
+ b.Text = text
+ b.Font = Enum.Font.GothamSemibold
+ b.TextSize = 14
+ b.TextColor3 = Color3.new(1,1,1)
+ b.BackgroundColor3 = Color3.fromRGB(80,80,80)
+ Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+ b.Parent = btnHolder
+ return b
+end
+
+------------------------------------------------
+-- FITUR UTAMA
+------------------------------------------------
+local highlightActive, fullbrightActive, flyActive, noclipActive = false, false, false, false
+local brightLoop, CFloop, noclipConn = nil, nil, nil
+local highlightObjects = {}
+local CFspeed = 100
+local Head
+
+-- Highlight
+local function clearHighlights()
+ for _,h in pairs(highlightObjects) do if h then h:Destroy() end end
+ highlightObjects = {}
+end
+local function updateHighlights()
+ if not highlightActive then clearHighlights() return end
+ for _,plr in pairs(Players:GetPlayers()) do
+  if plr ~= player and plr.Character and not highlightObjects[plr] then
+   local h = Instance.new("Highlight")
+   h.FillColor = Color3.fromRGB(255,50,50)
+   h.OutlineColor = Color3.fromRGB(100,0,0)
+   h.FillTransparency = 0.3
+   h.Parent = plr.Character
+   highlightObjects[plr] = h
+  end
+ end
+end
+RunService.RenderStepped:Connect(function()
+ if highlightActive then updateHighlights() end
+end)
+
+-- Fullbright
+local function nofog()
+ local L = game:GetService("Lighting")
+ L.FogEnd = 1e5
+ for _,o in pairs(L:GetDescendants()) do
+  if o:IsA("Atmosphere") then o:Destroy() end
+ end
+end
+local function loopfullbright()
+ local L = game:GetService("Lighting")
+ if brightLoop then brightLoop:Disconnect() end
+ local function upd()
+  L.Brightness = 2
+  L.ClockTime = 14
+  L.FogEnd = 1e5
+  L.GlobalShadows = false
+  L.OutdoorAmbient = Color3.fromRGB(128,128,128)
+ end
+ brightLoop = RunService.RenderStepped:Connect(upd)
+ upd()
+end
+local function unloopfullbright() if brightLoop then brightLoop:Disconnect() brightLoop=nil end end
+
+------------------------------------------------
+-- MOBILE FLY (versi baru, hybrid-friendly)
+------------------------------------------------
+local CMD_Settings = {
+ FlyCMD = {
+  FlyOn = false,
+  FlySpeed = 2
+ }
+}
+
+local mfly1, mfly2
+
+function UnMobileFly()
+ CMD_Settings.FlyCMD.FlyOn = false
+ local char = player.Character
+ if not char then return end
+ local root = char:FindFirstChild("HumanoidRootPart")
+ if not root then return end
+
+ if root:FindFirstChild("BodyVelocity") then
+  root.BodyVelocity:Destroy()
+ end
+ if root:FindFirstChild("BodyGyro") then
+  root.BodyGyro:Destroy()
+ end
+
+ local humanoid = char:FindFirstChildOfClass("Humanoid")
+ if humanoid then
+  humanoid.PlatformStand = false
+ end
+
+ if mfly1 then mfly1:Disconnect() mfly1 = nil end
+ if mfly2 then mfly2:Disconnect() mfly2 = nil end
+end
+
+function MobileFly()
+ UnMobileFly()
+ CMD_Settings.FlyCMD.FlyOn = true
+
+ local root = player.Character:WaitForChild("HumanoidRootPart")
+ local camera = workspace.CurrentCamera
+ local v3none = Vector3.new()
+ local v3zero = Vector3.new(0, 0, 0)
+ local v3inf = Vector3.new(9e9, 9e9, 9e9)
+
+ local controlModule = require(player.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+ local bv = Instance.new("BodyVelocity")
+ bv.Name = "BodyVelocity"
+ bv.Parent = root
+ bv.MaxForce = v3zero
+ bv.Velocity = v3zero
+
+ local bg = Instance.new("BodyGyro")
+ bg.Name = "BodyGyro"
+ bg.Parent = root
+ bg.MaxTorque = v3inf
+ bg.P = 1000
+ bg.D = 50
+
+ mfly1 = player.CharacterAdded:Connect(function()
+  local newRoot = player.Character:WaitForChild("HumanoidRootPart")
+  local newBv = Instance.new("BodyVelocity")
+  newBv.Name = "BodyVelocity"
+  newBv.Parent = newRoot
+  newBv.MaxForce = v3zero
+  newBv.Velocity = v3zero
+
+  local newBg = Instance.new("BodyGyro")
+  newBg.Name = "BodyGyro"
+  newBg.Parent = newRoot
+  newBg.MaxTorque = v3inf
+  newBg.P = 1000
+  newBg.D = 50
+ end)
+
+ mfly2 = RunService.RenderStepped:Connect(function()
+  root = player.Character:WaitForChild("HumanoidRootPart")
+  camera = workspace.CurrentCamera
+  if player.Character:FindFirstChildWhichIsA("Humanoid") and root:FindFirstChild("BodyVelocity") and root:FindFirstChild("BodyGyro") then
+   local humanoid = player.Character:FindFirstChildWhichIsA("Humanoid")
+   local VelocityHandler = root:FindFirstChild("BodyVelocity")
+   local GyroHandler = root:FindFirstChild("BodyGyro")
+
+   VelocityHandler.MaxForce = v3inf
+   GyroHandler.MaxTorque = v3inf
+   humanoid.PlatformStand = true
+   GyroHandler.CFrame = camera.CFrame
+   VelocityHandler.Velocity = v3none
+
+   local direction = controlModule:GetMoveVector()
+   if direction.Magnitude > 0 then
+    VelocityHandler.Velocity =
+     (camera.CFrame.LookVector * -direction.Z + camera.CFrame.RightVector * direction.X)
+     * (CMD_Settings.FlyCMD.FlySpeed * 50)
+   end
+  end
+ end)
+end
+
+------------------------------------------------
+-- TAB SPEED (Speed Settings)
+------------------------------------------------
+local speedTab = nil
+
+local function openSpeedTab()
+	if speedTab and speedTab.Parent then speedTab:Destroy() end
+
+	speedTab = Instance.new("Frame")
+	speedTab.Name = "SpeedTab"
+	speedTab.Size = UDim2.new(0, 220, 0, 130)
+	speedTab.Position = UDim2.new(0.5, -110, 0.5, -65) -- tengah
+	speedTab.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	speedTab.BorderSizePixel = 0
+	speedTab.Active = true
+	speedTab.Draggable = true
+	speedTab.Parent = gui
+	Instance.new("UICorner", speedTab).CornerRadius = UDim.new(0, 10)
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, 0, 0, 28)
+	title.BackgroundTransparency = 1
+	title.Text = "Speed Settings"
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 16
+	title.TextColor3 = Color3.new(1, 1, 1)
+	title.Parent = speedTab
+
+	-- Label
+	local speedLab = Instance.new("TextLabel")
+	speedLab.Size = UDim2.new(1, -20, 0, 20)
+	speedLab.Position = UDim2.new(0, 10, 0, 40)
+	speedLab.BackgroundTransparency = 1
+	speedLab.Text = "WalkSpeed:"
+	speedLab.Font = Enum.Font.GothamSemibold
+	speedLab.TextSize = 14
+	speedLab.TextColor3 = Color3.new(1, 1, 1)
+	speedLab.TextXAlignment = Enum.TextXAlignment.Left
+	speedLab.Parent = speedTab
+
+	-- Input box (default dari Humanoid.WalkSpeed atau 16)
+	local char = player.Character
+	local hum = char and char:FindFirstChildWhichIsA("Humanoid")
+	local defaultSpeed = hum and hum.WalkSpeed or 16
+
+	local speedBox = Instance.new("TextBox")
+	speedBox.Size = UDim2.new(0, 80, 0, 22)
+	speedBox.Position = UDim2.new(0.5, 5, 0, 40)
+	speedBox.Text = tostring(defaultSpeed)
+	speedBox.ClearTextOnFocus = false
+	speedBox.Font = Enum.Font.GothamSemibold
+	speedBox.TextSize = 14
+	speedBox.TextColor3 = Color3.new(0, 0, 0)
+	speedBox.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+	Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0, 4)
+	speedBox.Parent = speedTab
+
+	speedBox.FocusLost:Connect(function()
+		local n = tonumber(speedBox.Text)
+		if n then
+			-- Terapkan speed
+			local Char = player.Character or workspace:FindFirstChild(player.Name)
+			local Human = Char and Char:FindFirstChildWhichIsA("Humanoid")
+			if Human then
+				Human.WalkSpeed = n
+			end
+			-- Simpan ke loop agar tetap aktif
+			if HumanModCons.wsLoop then HumanModCons.wsLoop:Disconnect() end
+			HumanModCons.wsLoop = Human:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+				Human.WalkSpeed = n
+			end)
+			if HumanModCons.wsCA then HumanModCons.wsCA:Disconnect() end
+			HumanModCons.wsCA = player.CharacterAdded:Connect(function(nChar)
+				local newHum = nChar:WaitForChild("Humanoid")
+				newHum.WalkSpeed = n
+				if HumanModCons.wsLoop then HumanModCons.wsLoop:Disconnect() end
+				HumanModCons.wsLoop = newHum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+					newHum.WalkSpeed = n
+				end)
+			end)
+		end
+		speedBox.Text = tostring(n or defaultSpeed)
+	end)
+
+	-- Tombol Back
+	local backBtn = Instance.new("TextButton")
+	backBtn.Size = UDim2.new(0, 90, 0, 28)
+	backBtn.Position = UDim2.new(0.5, -45, 0, 80)
+	backBtn.Text = "Back"
+	backBtn.Font = Enum.Font.GothamSemibold
+	backBtn.TextSize = 14
+	backBtn.TextColor3 = Color3.new(1, 1, 1)
+	backBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+	Instance.new("UICorner", backBtn).CornerRadius = UDim.new(0, 6)
+	backBtn.Parent = speedTab
+	backBtn.MouseButton1Click:Connect(function()
+		if speedTab then speedTab:Destroy() end
+	end)
+end
+
+------------------------------------------------
+-- NOCLIP
+------------------------------------------------
+local function startNoclip()
+ noclipActive = true
+ noclipConn = RunService.Stepped:Connect(function()
+  if player.Character then
+   for _,p in pairs(player.Character:GetDescendants()) do
+    if p:IsA("BasePart") then p.CanCollide=false end
+   end
+  end
+ end)
+end
+local function stopNoclip()
+ noclipActive = false
+ if noclipConn then noclipConn:Disconnect() noclipConn=nil end
+end
+
+------------------------------------------------
+-- WAYPOINT MANAGED
+------------------------------------------------
+local waypoints = {}
+local waypointGUI = nil
+local waypointVisible = false
+
+local function refreshWPList(wpFrame)
+ for _,child in pairs(wpFrame:GetChildren()) do
+  if child:IsA("TextButton") then child:Destroy() end
+ end
+
+ for i,wp in ipairs(waypoints) do
+  local btn = Instance.new("TextButton")
+  btn.Size = UDim2.new(1, -8, 0, 26)
+  btn.Text = wp.name
+  btn.Font = Enum.Font.GothamSemibold
+  btn.TextSize = 14
+  btn.TextColor3 = Color3.new(1,1,1)
+  btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+  Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+  btn.Parent = wpFrame
+
+  btn.MouseButton1Click:Connect(function()
+   local char = player.Character
+   local root = char and char:FindFirstChild("HumanoidRootPart")
+   if root then
+    root.CFrame = CFrame.new(wp.pos + Vector3.new(0,3,0))
+   end
+  end)
+ end
+
+ wpFrame.CanvasSize = UDim2.new(0,0,0,#waypoints * 30)
+end
+
+local function saveWaypoint(wpFrame)
+ local char = player.Character
+ local root = char and char:FindFirstChild("HumanoidRootPart")
+ if root then
+  local name = "WP" .. tostring(#waypoints + 1)
+  table.insert(waypoints, {name = name, pos = root.Position})
+  refreshWPList(wpFrame)
+ end
+end
+
+local function toggleWaypointGUI()
+ waypointVisible = not waypointVisible
+
+ if waypointVisible then
+  if waypointGUI and waypointGUI.Parent then
+   waypointGUI.Visible = true
+   return
+  end
+
+  waypointGUI = Instance.new("Frame")
+  waypointGUI.Name = "WaypointManager"
+  waypointGUI.Size = UDim2.new(0, 240, 0, 200)
+  waypointGUI.Position = UDim2.new(0.5, -120, 0.5, -100)
+  waypointGUI.BackgroundColor3 = Color3.fromRGB(40,40,40)
+  waypointGUI.BorderSizePixel = 0
+  waypointGUI.Active = true
+  waypointGUI.Draggable = true
+  waypointGUI.Parent = gui
+  Instance.new("UICorner", waypointGUI).CornerRadius = UDim.new(0,10)
+
+  local title = Instance.new("TextLabel")
+  title.Size = UDim2.new(1, 0, 0, 28)
+  title.BackgroundTransparency = 1
+  title.Text = "Waypoint Manager"
+  title.Font = Enum.Font.GothamBold
+  title.TextSize = 16
+  title.TextColor3 = Color3.new(1,1,1)
+  title.Parent = waypointGUI
+
+  -- Tombol Save Waypoint
+  local saveBtn = Instance.new("TextButton")
+  saveBtn.Size = UDim2.new(0, 110, 0, 28)
+  saveBtn.Position = UDim2.new(0, 10, 0, 36)
+  saveBtn.Text = "Save Waypoint"
+  saveBtn.Font = Enum.Font.GothamSemibold
+  saveBtn.TextSize = 14
+  saveBtn.TextColor3 = Color3.new(1,1,1)
+  saveBtn.BackgroundColor3 = Color3.fromRGB(90,90,90)
+  Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0,6)
+  saveBtn.Parent = waypointGUI
+
+  -- Tombol Close
+  local closeBtn = Instance.new("TextButton")
+  closeBtn.Size = UDim2.new(0, 90, 0, 28)
+  closeBtn.Position = UDim2.new(1, -100, 0, 36)
+  closeBtn.Text = "Close"
+  closeBtn.Font = Enum.Font.GothamSemibold
+  closeBtn.TextSize = 14
+  closeBtn.TextColor3 = Color3.new(1,1,1)
+  closeBtn.BackgroundColor3 = Color3.fromRGB(150,0,0)
+  Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0,6)
+  closeBtn.Parent = waypointGUI
+
+  closeBtn.MouseButton1Click:Connect(function()
+   waypointGUI.Visible = false
+   waypointVisible = false
+  end)
+
+  local wpFrame = Instance.new("ScrollingFrame")
+  wpFrame.Size = UDim2.new(1, -20, 0, 100)
+  wpFrame.Position = UDim2.new(0, 10, 0, 70)
+  wpFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+  wpFrame.BorderSizePixel = 0
+  wpFrame.ScrollBarThickness = 6
+  wpFrame.CanvasSize = UDim2.new(0,0,0,0)
+  wpFrame.Parent = waypointGUI
+  Instance.new("UICorner", wpFrame).CornerRadius = UDim.new(0,6)
+
+  local listLayout = Instance.new("UIListLayout", wpFrame)
+  listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+  listLayout.Padding = UDim.new(0,4)
+
+  saveBtn.MouseButton1Click:Connect(function()
+   saveWaypoint(wpFrame)
+  end)
+
+  refreshWPList(wpFrame)
+
+ else
+  if waypointGUI and waypointGUI.Parent then
+   waypointGUI.Visible = false
+  end
+ end
+end
+
+------------------------------------------------
+-- TOMBOL UTAMA
+------------------------------------------------
+local btnHighlight = newButton("Highlight","Highlight: OFF")
+btnHighlight.MouseButton1Click:Connect(function()
+	highlightActive = not highlightActive
+	btnHighlight.Text = highlightActive and "Highlight: ON" or "Highlight: OFF"
+	btnHighlight.BackgroundColor3 = highlightActive and Color3.fromRGB(150,0,0) or Color3.fromRGB(80,80,80)
+	updateHighlights()
+end)
+
+local btnBright = newButton("Fullbright","Fullbright: OFF")
+btnBright.MouseButton1Click:Connect(function()
+	fullbrightActive = not fullbrightActive
+	if fullbrightActive then nofog(); loopfullbright() else unloopfullbright() end
+	btnBright.Text = fullbrightActive and "Fullbright: ON" or "Fullbright: OFF"
+	btnBright.BackgroundColor3 = fullbrightActive and Color3.fromRGB(150,0,0) or Color3.fromRGB(80,80,80)
+end)
+
+local btnNoclip = newButton("Noclip","Noclip: OFF")
+btnNoclip.MouseButton1Click:Connect(function()
+	noclipActive = not noclipActive
+	if noclipActive then startNoclip() else stopNoclip() end
+	btnNoclip.Text = noclipActive and "Noclip: ON" or "Noclip: OFF"
+	btnNoclip.BackgroundColor3 = noclipActive and Color3.fromRGB(150,0,0) or Color3.fromRGB(80,80,80)
+end)
+
+local btnWaypoint = newButton("Waypoint","Waypoint")
+btnWaypoint.MouseButton1Click:Connect(toggleWaypointGUI)
+
+local btnDestroy = newButton("Destroy","Destroy GUI")
+btnDestroy.BackgroundColor3 = Color3.fromRGB(150,0,0)
+btnDestroy.MouseButton1Click:Connect(function() gui:Destroy() end)
+
+------------------------------------------------
+-- TAB FLY (Fly, CFly, Speed Input, Back)
+------------------------------------------------
+local flyTab = nil
+local flySpeed = 100          -- default
+local flying = false          -- BodyVelocity fly
+local cFlying = false         -- CFrame fly
+local flyBV, flyBG, flyConn   -- BodyVelocity fly instances
+local cflyLoop                -- CFrame fly loop
+
+local function endFly()
+	if flyConn then flyConn:Disconnect() flyConn = nil end
+	if flyBV then flyBV:Destroy() flyBV = nil end
+	if flyBG then flyBG:Destroy() flyBG = nil end
+	local char = player.Character
+	if char then
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if hum then hum.PlatformStand = false end
+	end
+	flying = false
+end
+
+local function endCFly()
+	if cflyLoop then cflyLoop:Disconnect() cflyLoop = nil end
+	local char = player.Character
+	if char then
+		local head = char:FindFirstChild("Head")
+		if head then head.Anchored = false end
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if hum then hum.PlatformStand = false end
+	end
+	cFlying = false
+end
+
+local function openFlyTab()
+	if flyTab and flyTab.Parent then flyTab:Destroy() end
+
+	flyTab = Instance.new("Frame")
+	flyTab.Name = "FlyTab"
+	flyTab.Size = UDim2.new(0,220,0,190)
+	flyTab.Position = UDim2.new(0.5, -110, 0.5, -95)
+	flyTab.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	flyTab.BorderSizePixel = 0
+	flyTab.Active = true
+	flyTab.Draggable = true
+	flyTab.Parent = gui
+	Instance.new("UICorner", flyTab).CornerRadius = UDim.new(0,10)
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1,0,0,28)
+	title.BackgroundTransparency = 1
+	title.Text = "Fly Settings"
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 16
+	title.TextColor3 = Color3.new(1,1,1)
+	title.Parent = flyTab
+
+	-- Speed input
+	local speedLab = Instance.new("TextLabel")
+	speedLab.Size = UDim2.new(1,-20,0,20)
+	speedLab.Position = UDim2.new(0,10,0,40)
+	speedLab.BackgroundTransparency = 1
+	speedLab.Text = "Speed:"
+	speedLab.Font = Enum.Font.GothamSemibold
+	speedLab.TextSize = 14
+	speedLab.TextColor3 = Color3.new(1,1,1)
+	speedLab.TextXAlignment = Enum.TextXAlignment.Left
+	speedLab.Parent = flyTab
+
+	local speedBox = Instance.new("TextBox")
+	speedBox.Size = UDim2.new(0,80,0,22)
+	speedBox.Position = UDim2.new(0.5,5,0,40)
+	speedBox.Text = tostring(flySpeed)
+	speedBox.ClearTextOnFocus = false
+	speedBox.Font = Enum.Font.GothamSemibold
+	speedBox.TextSize = 14
+	speedBox.TextColor3 = Color3.new(0,0,0)
+	speedBox.BackgroundColor3 = Color3.fromRGB(220,220,220)
+	Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0,4)
+	speedBox.Parent = flyTab
+	speedBox.FocusLost:Connect(function()
+		local n = tonumber(speedBox.Text)
+		if n then flySpeed = n end
+		speedBox.Text = tostring(flySpeed)
+	end)
+
+	local function mkBtn(name, y, callback)
+		local b = Instance.new("TextButton")
+		b.Size = UDim2.new(0,90,0,28)
+		b.Position = UDim2.new(0.5, name=="Back" and -95 or 5, 0, y)
+		b.Text = name
+		b.Font = Enum.Font.GothamSemibold
+		b.TextSize = 14
+		b.TextColor3 = Color3.new(1,1,1)
+		b.BackgroundColor3 = Color3.fromRGB(80,80,80)
+		Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+		b.Parent = flyTab
+		b.MouseButton1Click:Connect(callback)
+		return b
+	end
+
+	-- Toggle Fly (BodyVelocity)
+	local flyBtn = mkBtn("Fly", 75, function()
+		if flying then
+			endFly()
+			flyBtn.Text = "Fly"
+			flyBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+		else
+			endCFly() -- matikan cfly kalau nyala
+			local char = player.Character or player.CharacterAdded:Wait()
+			local root = char:WaitForChild("HumanoidRootPart")
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			hum.PlatformStand = true
+
+			flyBV = Instance.new("BodyVelocity")
+			flyBV.MaxForce = Vector3.new(9e9,9e9,9e9)
+			flyBV.Parent = root
+
+			flyBG = Instance.new("BodyGyro")
+			flyBG.MaxTorque = Vector3.new(9e9,9e9,9e9)
+			flyBG.P = 1000
+			flyBG.D = 50
+			flyBG.Parent = root
+
+			local control = require(player.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+			flyConn = RunService.RenderStepped:Connect(function()
+				local cam = workspace.CurrentCamera
+				local move = control:GetMoveVector()
+				flyBG.CFrame = cam.CFrame
+				flyBV.Velocity = Vector3.new()
+				if move.Magnitude > 0 then
+					flyBV.Velocity = (cam.CFrame.LookVector*-move.Z + cam.CFrame.RightVector*move.X) * flySpeed
+				end
+			end)
+			flying = true
+			flyBtn.Text = "Fly (ON)"
+			flyBtn.BackgroundColor3 = Color3.fromRGB(150,0,0)
+		end
+	end)
+
+	-- Toggle CFly (CFrame)
+	local cflyBtn = mkBtn("CFly", 115, function()
+		if cFlying then
+			endCFly()
+			cflyBtn.Text = "CFly"
+			cflyBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+		else
+			endFly() -- matikan fly kalau nyala
+			local char = player.Character or player.CharacterAdded:Wait()
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			local head = char:WaitForChild("Head")
+			hum.PlatformStand = true
+			head.Anchored = true
+			if cflyLoop then cflyLoop:Disconnect() end
+			cflyLoop = RunService.Heartbeat:Connect(function(dt)
+				local move = hum.MoveDirection * (flySpeed * dt)
+				local cam = workspace.CurrentCamera
+				local hc = head.CFrame
+				local cc = cam.CFrame
+				local off = hc:ToObjectSpace(cc).Position
+				cc = cc * CFrame.new(-off.X, -off.Y, -off.Z + 1)
+				local cp, hp = cc.Position, hc.Position
+				local obj = CFrame.new(cp, Vector3.new(hp.X, cp.Y, hp.Z)):VectorToObjectSpace(move)
+				head.CFrame = CFrame.new(hp) * (cc - cp) * CFrame.new(obj)
+			end)
+			cFlying = true
+			cflyBtn.Text = "CFly (ON)"
+			cflyBtn.BackgroundColor3 = Color3.fromRGB(150,0,0)
+		end
+	end)
+
+	-- Close tab
+	mkBtn("Back", 155, function()
+		if flyTab then flyTab:Destroy() end
+	end)
+end
+
+-- Tombol buka tab Fly (hanya 1)
+local btnFlySet = newButton("FlySet","Fly Settings")
+btnFlySet.MouseButton1Click:Connect(openFlyTab)
+
+------------------------------------------------
+-- TP TOOL (teleport ke titik cursor)
+------------------------------------------------
+local btnTpTool = newButton("TpTool","TpTool")
+btnTpTool.MouseButton1Click:Connect(function()
+ local tpTool = Instance.new("Tool")
+ tpTool.Name = "Teleport Tool"
+ tpTool.RequiresHandle = false
+ tpTool.Parent = player.Backpack
+
+ tpTool.Activated:Connect(function()
+  local char = player.Character
+  local root = char and char:FindFirstChild("HumanoidRootPart")
+  if root then
+   local hit = mouse.Hit
+   if hit then
+    root.CFrame = CFrame.new(hit.Position + Vector3.new(0, 3, 0))
+   end
+  end
+ end)
+end)
+
+local btnSpeedSet = newButton("SpeedSet", "Speed Settings")
+btnSpeedSet.MouseButton1Click:Connect(openSpeedTab)
+local btnAnti = newButton("Anti","Anti Ban")
+local antiActive = false
+btnAnti.MouseButton1Click:Connect(function()
+	antiActive = not antiActive
+	if antiActive then
+		-- gabungan anti-kick + anti-ban
+		local oldNamecall
+		oldNamecall = hookmetamethod(game, "__namecall", function(self,...)
+			local method = getnamecallmethod()
+			local args = {...}
+			if method == "Kick" then return end
+			if (method == "FireServer" or method == "InvokeServer") then
+				if tostring(self):lower():find("ban") or tostring(self):lower():find("kick") then
+					return
+				end
+			end
+			return oldNamecall(self,...)
+		end)
+	end
+	btnAnti.Text = antiActive and "Anti: ON" or "Anti: OFF"
+	btnAnti.BackgroundColor3 = antiActive and Color3.fromRGB(150,0,0) or Color3.fromRGB(80,80,80)
+end)
