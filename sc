@@ -14,4 +14,10 @@ elseif id == 7546582051 then
 elseif id == 7671049560 then
     --The forge
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Tofi-Hub/Tofi-Hub/refs/heads/main/loader.lua"))()
+elseif id == 6701277882 then
+    --fish it!
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ImRevoltexee/XYRA-HUB/main/loader.lua"))()
+elseif id == 4762170842 then
+    --drill block simulator
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/rndmq/Serverlist/refs/heads/main/Server87"))()
 end
