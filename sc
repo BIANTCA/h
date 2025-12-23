@@ -1,4 +1,4 @@
-local id = tostring(game.GameId)
+local id = game.GameId
 if game.PlaceId == 13822889 then
     --Lumber tycoon 2
     loadstring(game:HttpGet('https://raw.githubusercontent.com/DevKron/Kron_Hub/refs/heads/main/lt2new'))("")
