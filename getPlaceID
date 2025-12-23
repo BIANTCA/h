@@ -1,0 +1,11 @@
+-- Dapatkan Place ID
+local placeId = game.PlaceId
+
+-- Konversi ke string
+local placeIdStr = tostring(placeId)
+
+-- Salin ke clipboard
+setclipboard(placeIdStr)
+
+-- Beri tahu user
+print("Place ID disalin ke clipboard: " .. placeIdStr)
