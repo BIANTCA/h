@@ -20,4 +20,13 @@ elseif id == 6701277882 then
 elseif id == 4762170842 then
     --drill block simulator
     loadstring(game:HttpGet("https://raw.githubusercontent.com/rndmq/Serverlist/refs/heads/main/Server87"))()
+elseif id == 9228045253 then
+    --chop your tree
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Frost230/Embee/refs/heads/main/EmbeeScript"))()
+elseif id == 1312971993 then
+    -- saber simulator
+    loadstring(game:HttpGet("https://www.pompomsaturin.site/saber.lua"))()
+elseif id == 8741232785 then
+    --fish spears
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/JumaNexus/Spear-Fishing/refs/heads/main/main.lua"))()
 end
