@@ -29,4 +29,31 @@ elseif id == 1312971993 then
 elseif id == 8741232785 then
     --fish spears
     loadstring(game:HttpGet("https://raw.githubusercontent.com/JumaNexus/Spear-Fishing/refs/heads/main/main.lua"))()
+elseif id == 8574830649 then
+    --noob invaders
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/NoobinvaderV2"))()
+elseif id == 343031442 then
+    --ninja assasin
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/QuadraX7/Idk/main/IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII"))()
+elseif id == 8779464785 then
+    --tap simulator
+    loadstring(game:HttpGet("https://pastefy.app/9IIig7pp/raw"))()
+elseif id == 3476371299 then
+    --race clicker
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/darraghd493/roblox-scripts/main/loader/loader.lua", true))()
+elseif id == 7662333120 then
+    --kayak racing
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/SETHHHX/.../refs/heads/main/%5BNEW%5D%20Kayak%20Racing"))()
+elseif id == 5500599119 then
+    --aqua racer
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/gumanba/Scripts/main/AquaRacer"))()
+elseif id == 6707924214 then
+    --horse race
+    loadstring(game:HttpGet("https://protected-roblox-scripts.onrender.com/ff5dc1b6005535a7a17137110ceccc5e"))()
+elseif id == 8553877788 then
+    --boxing slayer
+    loadstring(game:HttpGet("https://pastebin.com/raw/UnNCFmM2"))()
+elseif id == 540856839 then
+    --Treasure hunt simulator
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/BIANTCA/Script/refs/heads/main/TreasureHuntSimulator.lua"))()
 end
