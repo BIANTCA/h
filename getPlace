@@ -1,0 +1,9 @@
+-- LocalScript
+local placeId = tostring(game.PlaceId)
+
+if setclipboard then
+ setclipboard(placeId)
+ print("PlaceId disalin ke clipboard:", placeId)
+else
+ warn("Clipboard tidak tersedia. PlaceId:", placeId)
+end
