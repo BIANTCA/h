@@ -56,4 +56,7 @@ elseif id == 8553877788 then
 elseif id == 540856839 then
     --Treasure hunt simulator
     loadstring(game:HttpGet("https://raw.githubusercontent.com/BIANTCA/Script/refs/heads/main/TreasureHuntSimulator.lua"))()
+elseif id == 105689481 then
+    --Miner Heaven
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/BIANTCA/Script/refs/heads/main/MinerHeaven.lua"))()
 end
