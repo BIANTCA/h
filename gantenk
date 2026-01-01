@@ -1,13 +1,1 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
-local Window = Rayfield:CreateWindow({
- Name = "My Custom GUI",
- LoadingTitle = "Rayfield Interface",
- LoadingSubtitle = "Powered by Universal.lua"
-})
-
-local MainTab = Window:CreateTab("Main", 4483362458)
-_G.MainTab = MainTab
-
-local Universal = loadstring(game:HttpGet("https://raw.githubusercontent.com/BIANTCA/Script/refs/heads/main/universal.lua"))()
-Universal.CreateUniversalTab(Window, Rayfield, game:GetService("Players"), game:GetService("RunService"))
+loadstring(game:HttpGet("https://raw.githubusercontent.com/BIANTCA/Script/refs/heads/main/scriptLoader.lua"))()
