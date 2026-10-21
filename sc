@@ -59,7 +59,7 @@ elseif id == 540856839 then
 elseif id == 105689481 then
     --Miner Heaven
     loadstring(game:HttpGet("https://raw.githubusercontent.com/BIANTCA/Script/refs/heads/main/MinerHeaven.lua"))()
-elseif
-    local autoScript = loadstring(game:HttpGet("https://pastebin.com/raw/S14pE2pm")()
+else
+    local autoScript = loadstring(game:HttpGet("https://pastebin.com/raw/S14pE2pm"))()
     autoScript.run()
 end
